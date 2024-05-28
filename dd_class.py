@@ -38,21 +38,33 @@ class Dragodinde:
 class Elevage:
     def __init__(self):
         self.dragodindes = []
+        self.special_cases = {
+            "Rousse et Dorée": "Orchidée",
+            "Amande et Dorée": "Ebène",
+            "Rousse et Amande": "Pourpre",
+            "Indigo et Ebène": "Orchidée",
+            "Pourpre et Orchidée": "Turquoise",
+            "Indigo et Pourpre": "Ivoire",
+            "Ebène et Orchidée": "Turquoise",
+            "Ivoire et Turquoise": "Emeraude",
+            "Turquoise et Orchidée": "Prune",
+            "Pourpre et Ivoire": "Emeraude"
+        }
 
     def add_DD(self, dragodinde:object) :
         self.dragodindes.append(dragodinde)
 
-    def check_mort(self, dragodinde:object):
+    def check_mort(self, dragodinde:object) :
         if dragodinde.get_nombre_reproductions() >= 20:
             self.dragodindes = [dd for dd in self.dragodindes if dd.id != dragodinde.get_id()]
 
-    def naissance(self, dragodinde:object):
+    def naissance(self, dragodinde:object) :
         self.dragodindes.append(dragodinde)
 
-    def check_couleur(couleur_A:str, couleur_B:str) -> bool :
+    def check_couleur(self, couleur_A:str, couleur_B:str) -> bool :
         return True if " et " not in couleur_A and  " et " not in couleur_B else False
     
-    def croisement_mono_mono(couleur_A: str, couleur_B: str):
+    def croisement_mono_mono(self, couleur_A: str, couleur_B: str):
         """
         Croisement : mono couleur (A) X mono couleur (B) :
         (45% couleur (A))(45% couleur (B))(10% bicolor (A/B))
@@ -63,7 +75,7 @@ class Elevage:
         proba[f"{couleur_A} et {couleur_B}"] += 0.10
         return proba
 
-    def croisement_mono_bi(couleur_A: str, couleur_B: str):
+    def croisement_mono_bi(self, couleur_A: str, couleur_B: str):
         """
         Croisement : mono couleur (A) X bi couleur (B):
         (50% mono)(50% bicolor)
@@ -73,15 +85,15 @@ class Elevage:
         proba[couleur_B] += 0.50
         return proba
 
-    def croisement_bi_bi(couleur_A: str, couleur_B: str):
+    def croisement_bi_bi(self, couleur_A: str, couleur_B: str):
         """
         Croisement : bi couleur (A) X bi couleur (B):
         (50% bicolor (A))(50% bi (B))
         """
         proba = defaultdict(float)
-        if couleur_A in special_cases and couleur_B in special_cases :
-            if special_cases[couleur_A] == special_cases[couleur_B] :
-                couleur_speciale = special_cases[couleur_A]
+        if couleur_A in self.special_cases and couleur_B in self.special_cases :
+            if self.special_cases[couleur_A] == self.special_cases[couleur_B] :
+                couleur_speciale = self.special_cases[couleur_A]
                 proba[couleur_speciale] += 0.10
                 proba[couleur_A] += 0.45
                 proba[couleur_B] += 0.45
@@ -90,7 +102,7 @@ class Elevage:
             proba[couleur_B] += 0.50
         return proba
 
-    def combiner_probabilites(proba1, proba2, poids1, poids2):
+    def combiner_probabilites(self, proba1, proba2, poids1, poids2):
         """
         Combine les probabilités de deux dictionnaires en utilisant des poids donnés.
         """
@@ -242,53 +254,3 @@ class Generations:
 
     def get_generations(self):
         return [str(gen) for gen in self.generations]
-
-# Création des générations
-generation_1 = Generation(1, True, ["Rousse", "Amande", "Dorée"])
-generation_2 = Generation(2, False, ["Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"])
-generation_3 = Generation(3, True, ["Indigo", "Ebène"])
-generation_4 = Generation(4, False, ["Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène", 
-                                     "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"])
-generation_5 = Generation(5, True, ["Pourpre", "Orchidée"])
-generation_6 = Generation(6, False, ["Pourpre et Rousse", "Orchidée et Rousse", "Amande et Pourpre", "Amande et Orchidée", 
-                                     "Dorée et Pourpre", "Dorée et Orchidée", "Indigo et Pourpre", "Indigo et Orchidée", 
-                                     "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"])
-generation_7 = Generation(7, True, ["Ivoire", "Turquoise"])
-generation_8 = Generation(8, False, ["Ivoire et Rousse", "Turquoise et Rousse", "Amande et Ivoire", "Amande et Turquoise", 
-                                     "Dorée et Ivoire", "Dorée et Turquoise", "Indigo et Ivoire", "Indigo et Turquoise", 
-                                     "Ebène et Ivoire", "Ebène et Turquoise", "Pourpre et Ivoire", "Turquoise et Pourpre", 
-                                     "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"])
-generation_9 = Generation(9, True, ["Emeraude", "Prune"])
-generation_10 = Generation(10, False, ["Rousse et Emeraude", "Rousse et Prune", "Amande et Emeraude", "Amande et Prune", 
-                                       "Dorée et Emeraude", "Dorée et Prune", "Indigo et Emeraude", "Indigo et Prune", 
-                                       "Ebène et Emeraude", "Ebène et Prune", "Pourpre et Emeraude", "Pourpre et Prune", 
-                                       "Orchidée et Emeraude", "Orchidée et Prune", "Ivoire et Emeraude", "Ivoire et Prune", 
-                                       "Turquoise et Emeraude", "Turquoise et Prune"])
-
-# Création de l'objet Generations
-generations = Generations()
-
-# Ajout des générations
-generations.add_generation(generation_1)
-generations.add_generation(generation_2)
-generations.add_generation(generation_3)
-generations.add_generation(generation_4)
-generations.add_generation(generation_5)
-generations.add_generation(generation_6)
-generations.add_generation(generation_7)
-generations.add_generation(generation_8)
-generations.add_generation(generation_9)
-generations.add_generation(generation_10)
-
-special_cases = {
-    "Rousse et Dorée": "Orchidée",
-    "Amande et Dorée": "Ebène",
-    "Rousse et Amande": "Pourpre",
-    "Indigo et Ebène": "Orchidée",
-    "Pourpre et Orchidée": "Turquoise",
-    "Indigo et Pourpre": "Ivoire",
-    "Ebène et Orchidée": "Turquoise",
-    "Ivoire et Turquoise": "Emeraude",
-    "Turquoise et Orchidée": "Prune",
-    "Pourpre et Ivoire": "Emeraude"
-}
