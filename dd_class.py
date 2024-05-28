@@ -254,3 +254,47 @@ class Generations:
 
     def get_generations(self):
         return [str(gen) for gen in self.generations]
+    
+
+
+
+import numpy as np
+import random
+import gym
+from gym import spaces
+
+class DragodindeEnv(gym.Env):
+    def __init__(self):
+        super(DragodindeEnv, self).__init__()
+        self.action_space = spaces.Discrete(2)  # Exemple: 2 actions possibles (accouplement A ou B)
+        self.observation_space = spaces.Box(low=0, high=1, shape=(10,), dtype=np.float32)  # Exemple: état de 10 dimensions
+
+        self.state = self.reset()
+        self.generation = 0
+        self.max_generations = 10
+
+    def step(self, action):
+        assert self.action_space.contains(action)
+        reward = 0
+        done = False
+
+        # Simulez le croisement ici, mettez à jour self.state et reward
+        # Exemple simplifié :
+        if action == 0:
+            reward = random.uniform(0, 1)
+        else:
+            reward = random.uniform(0, 1)
+
+        self.generation += 1
+        if self.generation >= self.max_generations:
+            done = True
+
+        return np.array(self.state), reward, done, {}
+
+    def reset(self):
+        self.state = np.random.rand(10)
+        self.generation = 0
+        return np.array(self.state)
+
+    def render(self, mode='human'):
+        print(f"Generation: {self.generation}, State: {self.state}")
