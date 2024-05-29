@@ -1,5 +1,5 @@
 import dd_class
-import Bot_repro_dd_dofus.DQNAgent
+#import Bot_repro_dd_dofus.DQNAgent
 
 def creat_elevage() :
     elevage = dd_class.Elevage()
@@ -61,4 +61,10 @@ def creat_generations() :
     return generations
 
 if __name__ == "__main__" :
+    elevage = creat_elevage()
     generations = creat_generations()
+    #print(str(elevage))
+    
+    new_dd = elevage.accouplement_naissance(elevage.get_dd_by_id(1), elevage.get_dd_by_id(2))
+    print(str(new_dd))
+    print(str(elevage))

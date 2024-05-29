@@ -1,7 +1,7 @@
 import tensorflow as tf
 import random
 import numpy as np
-from tensorflow import layers
+from tensorflow.keras import layers
 from collections import deque
 
 class DQNAgent:
