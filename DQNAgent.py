@@ -18,10 +18,11 @@ class DQNAgent:
 
     def _build_model(self):
         model = tf.keras.Sequential()
-        model.add(layers.Dense(24, input_dim=self.state_size, activation='relu'))
-        model.add(layers.Dense(24, activation='relu'))
+        model.add(layers.Dense(64, input_dim=self.state_size, activation='relu'))
+        model.add(layers.Dense(32, input_dim=self.state_size, activation='relu'))
+        model.add(layers.Dense(16, activation='relu'))
         model.add(layers.Dense(self.action_size, activation='linear'))
-        model.compile(loss='mse', optimizer=tf.keras.optimizers.Adam(lr=self.learning_rate))
+        model.compile(optimizer=tf.keras.optimizers.Adam(lr=self.learning_rate))
         return model
 
     def remember(self, state, action, reward, next_state, done):

@@ -1,8 +1,54 @@
 import random
 from collections import defaultdict 
+import numpy as np
+import random
+import gym
+from gym import spaces
+class Environnement(gym.Env):
+    def __init__(self):
+        super(Environnement, self).__init__()
+        self.action_space = spaces.Discrete(2)  # Exemple: 2 actions possibles (accouplement A ou B)
+        self.observation_space = spaces.Box(low=0, high=1, shape=(10,), dtype=np.float32)  # Exemple: état de 10 dimensions
+        self.state = self.reset()
+        self.generation = 0
+        self.max_generations = 10
 
+    def get_generation(self) :
+        return self.generation
+
+    def set_generation(self, actual_generation) :
+        self.generation = actual_generation
+    
+    def step(self, action):
+        assert self.action_space.contains(action)
+        reward = 0
+        done = False
+
+        # Simulez le croisement ici, mettez à jour self.state et reward
+        if action > self.generation:
+            reward = 1000
+            self.generation += 1
+
+        elif action == self.generation:
+            reward = 1
+
+        elif action < self.generation-2 :
+            reward = -1000
+
+        if self.generation == self.max_generations:
+            done = True
+
+        return np.array(self.state), reward, done, {}
+
+    def reset(self):
+        self.state = np.random.rand(10)
+        self.generation = 0
+        return np.array(self.state)
+
+    def render(self, mode='human'):
+        print(f"Generation: {self.generation}, State: {self.state}")
 class Dragodinde:
-    def __init__(self, id : int, sex: bool, couleur: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
+    def __init__(self, id : int, sex: str, couleur: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
         self.id = id
         self.sex = sex
         self.couleur = couleur
@@ -187,8 +233,15 @@ class Elevage:
         
         return dict(proba_finale)
 
-    def accoupler_naissance(self, male:object, female:object):
-        if male and female:
+    def choice_color(self, probabilities) :
+        # Liste des événements et des poids correspondants
+        events = list(probabilities.keys())
+        weights = list(probabilities.values())
+        selected_event = random.choices(events, weights=weights, k=1)[0]
+        return selected_event
+    
+    def accouplement_naissance(self, male:object, female:object) -> bool :
+        if male and female and male.get_sex() != female.get_sex() :
             male.nombre_reproductions += 1
             female.nombre_reproductions += 1
             nouvel_id = len(self.dragodindes) + 1
@@ -196,12 +249,16 @@ class Elevage:
             ancetres_female = female.arbre_genealogique[:2]
             nouvel_arbre_genealogique = [(male.couleur, female.couleur)] + ancetres_male + ancetres_female
             sexe = random.choice(['M', 'F'])
-            couleur = self.choix_croisement(male, female)
-            random.choice([male.couleur, female.couleur])  # Simplification de l'héritage de couleur
+            dic_probability = self.croisement(male, female)
+            couleur = self.choice_color(dic_probability)
             nouvelle_dd = Dragodinde(nouvel_id, sexe, couleur, nouvel_arbre_genealogique)
             self.naissance(nouvelle_dd)
             self.check_mort(male)
             self.check_mort(female)
+            return True
+        
+        else :
+            return False
 
 class Genealogie:
     def __init__(self):
@@ -254,47 +311,3 @@ class Generations:
 
     def get_generations(self):
         return [str(gen) for gen in self.generations]
-    
-
-
-
-import numpy as np
-import random
-import gym
-from gym import spaces
-
-class DragodindeEnv(gym.Env):
-    def __init__(self):
-        super(DragodindeEnv, self).__init__()
-        self.action_space = spaces.Discrete(2)  # Exemple: 2 actions possibles (accouplement A ou B)
-        self.observation_space = spaces.Box(low=0, high=1, shape=(10,), dtype=np.float32)  # Exemple: état de 10 dimensions
-
-        self.state = self.reset()
-        self.generation = 0
-        self.max_generations = 10
-
-    def step(self, action):
-        assert self.action_space.contains(action)
-        reward = 0
-        done = False
-
-        # Simulez le croisement ici, mettez à jour self.state et reward
-        # Exemple simplifié :
-        if action == 0:
-            reward = random.uniform(0, 1)
-        else:
-            reward = random.uniform(0, 1)
-
-        self.generation += 1
-        if self.generation >= self.max_generations:
-            done = True
-
-        return np.array(self.state), reward, done, {}
-
-    def reset(self):
-        self.state = np.random.rand(10)
-        self.generation = 0
-        return np.array(self.state)
-
-    def render(self, mode='human'):
-        print(f"Generation: {self.generation}, State: {self.state}")
