@@ -77,8 +77,11 @@ class Dragodinde:
     def get_arbre_genealogique(self):
         return self.arbre_genealogique.get_parents_and_grandparents()
 
-    def get_nombre_reproductions(self):
+    def get_nombre_reproductions(self) :
         return self.nombre_reproductions
+    
+    def add_reproduction(self):
+        self.nombre_reproductions += 1
     
     def __str__(self):
         return (f"ID: {self.id}\n"
@@ -90,17 +93,18 @@ class Dragodinde:
 class Elevage:
     def __init__(self):
         self.dragodindes = []
+
         self.special_cases = {
-            "Rousse et Dorée": "Orchidée",
-            "Amande et Dorée": "Ebène",
-            "Rousse et Amande": "Pourpre",
-            "Indigo et Ebène": "Orchidée",
-            "Pourpre et Orchidée": "Turquoise",
-            "Indigo et Pourpre": "Ivoire",
-            "Ebène et Orchidée": "Turquoise",
-            "Ivoire et Turquoise": "Emeraude",
-            "Turquoise et Orchidée": "Prune",
-            "Pourpre et Ivoire": "Emeraude"
+            "Rousse et Dorée": ["Indigo", "Orchidée"],
+            "Amande et Dorée": ["Indigo", "Ebène"],
+            "Rousse et Amande": ["Ebène", "Pourpre"],
+            "Indigo et Ebène": ["Orchidée", "Pourpre"],
+            "Pourpre et Orchidée": ["Ivoire", "Turquoise"],
+            "Indigo et Pourpre": ["Ivoire"],
+            "Ebène et Orchidée": ["Turquoise"],
+            "Turquoise et Orchidée": ["Prune"],
+            "Ivoire et Turquoise": ["Prune", "Emeraude"],
+            "Pourpre et Ivoire": ["Emeraude"]
         }
 
     def __str__(self):
@@ -131,13 +135,12 @@ class Elevage:
         (45% couleur (A))(45% couleur (B))(10% bicolor (A/B))
         """
         proba = defaultdict(float)
-        print("couleur dd : ", couleur_A, couleur_B)
         proba[couleur_A] += 0.45
         proba[couleur_B] += 0.45
         proba[f"{couleur_A} et {couleur_B}"] += 0.10
         return proba
 
-    def croisement_mono_bi(self, couleur_A: str, couleur_B: str):
+    #def croisement_mono_bi(self, couleur_A: str, couleur_B: str):
         """
         Croisement : mono couleur (A) X bi couleur (B):
         (50% mono)(50% bicolor)
@@ -153,15 +156,21 @@ class Elevage:
         (50% bicolor (A))(50% bi (B))
         """
         proba = defaultdict(float)
+        print(self.special_cases[couleur_A])
+        print(self.special_cases[couleur_B])
+        set1 = set(self.special_cases[couleur_A])
+        set2 = set(self.special_cases[couleur_B])
+        intersection = set1 & set2
         if couleur_A in self.special_cases and couleur_B in self.special_cases :
-            if self.special_cases[couleur_A] == self.special_cases[couleur_B] :
-                couleur_speciale = self.special_cases[couleur_A]
-                proba[couleur_speciale] += 0.10
+            if intersection :
+                proba[intersection.pop()] += 0.10
                 proba[couleur_A] += 0.45
                 proba[couleur_B] += 0.45
         else:
             proba[couleur_A] += 0.50
             proba[couleur_B] += 0.50
+        
+        print(proba)
         return proba
 
     def combiner_probabilites(self, proba1, proba2, poids1, poids2):
@@ -188,56 +197,52 @@ class Elevage:
         couleur_dinde1 = dinde1.get_couleur()
         couleur_dinde2 = dinde2.get_couleur()
         
-        # Croisement direct
         if self.check_couleur(couleur_dinde1, couleur_dinde2):
             proba_directe = self.croisement_mono_mono(couleur_dinde1, couleur_dinde2)
         else:
-            proba_directe = self.croisement_mono_bi(couleur_dinde1, couleur_dinde2)
+            proba_directe = self.croisement_bi_bi(couleur_dinde1, couleur_dinde2)
         
         # Croisement des parents
         proba_parents = defaultdict(float)
         if dinde1.get_arbre_genealogique() and dinde2.get_arbre_genealogique():
-            list_Gcouleur_dinde1 = dinde1.get_arbre_genealogique()[:2] # Parents only
-            list_Gcouleur_dinde2 = dinde2.get_arbre_genealogique()[:2] # Parents only
-            
-            for couleur_parent1 in list_Gcouleur_dinde1:
-                for couleur_parent2 in list_Gcouleur_dinde2:
-                    #Check case where there are no parents
-                    if couleur_parent1 and couleur_parent2:
-                        if self.check_couleur(couleur_parent1, couleur_parent2):
-                            proba_parents = self.combiner_probabilites(proba_parents, self.croisement_mono_mono(couleur_parent1, couleur_parent2), 1.0, 0.5)
-                        else:
-                            proba_parents = self.combiner_probabilites(proba_parents, self.croisement_mono_bi(couleur_parent1, couleur_parent2), 1.0, 0.5)
-        
+            list_Gcouleur_dinde1 = dinde1.get_arbre_genealogique()[0] # Parents only
+            list_Gcouleur_dinde2 = dinde2.get_arbre_genealogique()[0] # Parents only
+
+            for couleur_parent1, couleur_parent2 in zip(list_Gcouleur_dinde1, list_Gcouleur_dinde2) :
+                #Check case where there are no parents
+                if couleur_parent1 and couleur_parent2:
+                    if self.check_couleur(couleur_parent1, couleur_parent2):
+                        proba_parents = self.combiner_probabilites(proba_parents, self.croisement_mono_mono(couleur_parent1, couleur_parent2), 1.0, 0.5)
+                    else:
+                        proba_parents = self.combiner_probabilites(proba_parents, self.croisement_bi_bi(couleur_parent1, couleur_parent2), 1.0, 0.5)
+    
         # Croisement des grands-parents
         proba_grandparents = defaultdict(float)
         if dinde1.get_arbre_genealogique() and dinde2.get_arbre_genealogique():
-            list_Gcouleur_dinde1 = dinde1.get_arbre_genealogique()[2:6] # Grandparents only
-            list_Gcouleur_dinde2 = dinde2.get_arbre_genealogique()[2:6] # Grandparents only
+            list_Gcouleur_dinde1 = dinde1.get_arbre_genealogique()[1] # Grandparents only
+            list_Gcouleur_dinde2 = dinde2.get_arbre_genealogique()[1] # Grandparents only
             
-            for gcouleur_parent1 in list_Gcouleur_dinde1:
-                for gcouleur_parent2 in list_Gcouleur_dinde2:
-                    if gcouleur_parent1 and gcouleur_parent2:
-                        if self.check_couleur(gcouleur_parent1, gcouleur_parent2):
-                            proba_grandparents = self.combiner_probabilites(proba_grandparents, self.croisement_mono_mono(gcouleur_parent1, gcouleur_parent2), 1.0, 0.3)
-                        else:
-                            proba_grandparents = self.combiner_probabilites(proba_grandparents, self.croisement_mono_bi(gcouleur_parent1, gcouleur_parent2), 1.0, 0.3)
-        
+            for gcouleur_parent1, gcouleur_parent2 in zip(list_Gcouleur_dinde1, list_Gcouleur_dinde2) :
+                if gcouleur_parent1 and gcouleur_parent2:
+                    if self.check_couleur(gcouleur_parent1, gcouleur_parent2):
+                        proba_grandparents = self.combiner_probabilites(proba_grandparents, self.croisement_mono_mono(gcouleur_parent1, gcouleur_parent2), 1.0, 0.3)
+                    else:
+                        proba_grandparents = self.combiner_probabilites(proba_grandparents, self.croisement_bi_bi(gcouleur_parent1, gcouleur_parent2), 1.0, 0.3)
+    
         # Croisement des arrière-grands-parents
         proba_great_grandparents = defaultdict(float)
         if dinde1.get_arbre_genealogique() and dinde2.get_arbre_genealogique():
-            list_AGcouleur_dinde1 = dinde1.get_arbre_genealogique()[6:] # Great-grandparents only
-            list_AGcouleur_dinde2 = dinde2.get_arbre_genealogique()[6:] # Great-grandparents only
+            list_AGcouleur_dinde1 = dinde1.get_arbre_genealogique()[2] # Great-grandparents only
+            list_AGcouleur_dinde2 = dinde2.get_arbre_genealogique()[2] # Great-grandparents only
             
-            for ggcouleur_parent1 in list_AGcouleur_dinde1:
-                for ggcouleur_parent2 in list_AGcouleur_dinde2:
-                    #Check case where there are no parents
-                    if ggcouleur_parent1 and ggcouleur_parent2:
-                        if self.check_couleur(ggcouleur_parent1, ggcouleur_parent2):
-                            proba_great_grandparents = self.combiner_probabilites(proba_great_grandparents, self.croisement_mono_mono(ggcouleur_parent1, ggcouleur_parent2), 1.0, 0.2)
-                        else:
-                            proba_great_grandparents = self.combiner_probabilites(proba_great_grandparents, self.croisement_mono_bi(ggcouleur_parent1, ggcouleur_parent2), 1.0, 0.2)
-        
+            for ggcouleur_parent1, ggcouleur_parent2 in zip(list_AGcouleur_dinde1, list_AGcouleur_dinde2) :
+                #Check case where there are no parents
+                if ggcouleur_parent1 and ggcouleur_parent2:
+                    if self.check_couleur(ggcouleur_parent1, ggcouleur_parent2):
+                        proba_great_grandparents = self.combiner_probabilites(proba_great_grandparents, self.croisement_mono_mono(ggcouleur_parent1, ggcouleur_parent2), 1.0, 0.2)
+                    else:
+                        proba_great_grandparents = self.combiner_probabilites(proba_great_grandparents, self.croisement_bi_bi(ggcouleur_parent1, ggcouleur_parent2), 1.0, 0.2)
+    
         # Combinaison des probabilités
         proba_finale = self.combiner_probabilites(proba_directe, proba_parents, 0.5, 0.5)
         proba_finale = self.combiner_probabilites(proba_finale, proba_grandparents, 1.0, 0.3)
@@ -250,19 +255,28 @@ class Elevage:
         events = list(probabilities.keys())
         weights = list(probabilities.values())
         selected_event = random.choices(events, weights=weights, k=1)[0]
+        print(probabilities)
         return selected_event
     
     def accouplement_naissance(self, male:object, female:object) -> object :
         if male and female and male.get_sex() != female.get_sex() :
-            male.nombre_reproductions += 1
-            female.nombre_reproductions += 1
+            male.add_reproduction()
+            female.add_reproduction()
             nouvel_id = len(self.dragodindes) + 1
-            ancetres_male = male.get_arbre_genealogique()[:2]
-            ancetres_female = female.get_arbre_genealogique()[:2]
-            nouvel_arbre_genealogique = [(male.couleur, female.couleur)] + ancetres_male + ancetres_female
+
+            ancetres_male_gparent = male.get_arbre_genealogique()[0]
+            ancetres_female_gparent = female.get_arbre_genealogique()[0]
+            ancetres_gparent = [ancetres_male_gparent + ancetres_female_gparent]
+
+            ancetres_male_ggparent = male.get_arbre_genealogique()[1]
+            ancetres_female_ggparent = female.get_arbre_genealogique()[1]
+            ancetres_ggparent = [ancetres_male_ggparent + ancetres_female_ggparent]
+
+            nouvel_arbre_genealogique = [[male.couleur, female.couleur]] + ancetres_gparent + ancetres_ggparent
             sexe = random.choice(['M', 'F'])
             dic_probability = self.croisement(male, female)
             couleur = self.choice_color(dic_probability)
+
             nouvelle_dd = Dragodinde(nouvel_id, sexe, couleur, nouvel_arbre_genealogique)
             self.naissance(nouvelle_dd)
             self.check_mort(male)

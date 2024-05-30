@@ -3,14 +3,17 @@ import dd_class
 
 def creat_elevage() :
     elevage = dd_class.Elevage()
-    dd_rousse1 = dd_class.Dragodinde(1, "M", "rousse", 1)
-    dd_rousse2 = dd_class.Dragodinde(2, "F", "rousse", 1)
+    dd_rousse1 = dd_class.Dragodinde(1, "M", "Rousse", 1)
+    dd_rousse2 = dd_class.Dragodinde(2, "F", "Rousse", 1)
 
-    dd_amande1 = dd_class.Dragodinde(3, "M", "amande", 1)
-    dd_amande2 = dd_class.Dragodinde(4, "F", "amande", 1)
+    dd_amande1 = dd_class.Dragodinde(3, "M", "Amande", 1)
+    dd_amande2 = dd_class.Dragodinde(4, "F", "Amande", 1)
 
-    dd_dorée1 = dd_class.Dragodinde(5, "M", "dorée", 1)
-    dd_dorée2 = dd_class.Dragodinde(6, "F", "dorée", 1)
+    dd_dorée1 = dd_class.Dragodinde(5, "M", "Dorée", 1)
+    dd_dorée2 = dd_class.Dragodinde(6, "F", "Dorée", 1)
+
+    dd_am_roM = dd_class.Dragodinde(7, "M", "Amande et Dorée", 2)
+    dd_am_roF = dd_class.Dragodinde(8, "F", "Rousse et Dorée", 2)
 
     elevage.add_DD(dd_rousse1)
     elevage.add_DD(dd_rousse2)
@@ -18,6 +21,8 @@ def creat_elevage() :
     elevage.add_DD(dd_amande2)
     elevage.add_DD(dd_dorée1)
     elevage.add_DD(dd_dorée2)
+    elevage.add_DD(dd_am_roM)
+    elevage.add_DD(dd_am_roF)
 
     return elevage
 
@@ -63,8 +68,6 @@ def creat_generations() :
 if __name__ == "__main__" :
     elevage = creat_elevage()
     generations = creat_generations()
-    #print(str(elevage))
-    
-    new_dd = elevage.accouplement_naissance(elevage.get_dd_by_id(1), elevage.get_dd_by_id(2))
+    new_dd = elevage.accouplement_naissance(elevage.get_dd_by_id(8), elevage.get_dd_by_id(7))
     print(str(new_dd))
-    print(str(elevage))
+    #print(str(elevage))
