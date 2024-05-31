@@ -68,6 +68,12 @@ def creat_generations() :
 if __name__ == "__main__" :
     elevage = creat_elevage()
     generations = creat_generations()
-    new_dd = elevage.accouplement_naissance(elevage.get_dd_by_id(8), elevage.get_dd_by_id(7))
+    
+    print(str(elevage.get_dd_by_id(2).get_arbre_genealogique()))
+    new_dd = elevage.accouplement_naissance(elevage.get_dd_by_id(2), elevage.get_dd_by_id(1))
     print(str(new_dd))
+    print(" ")
+    new_dd2 = elevage.accouplement_naissance(elevage.get_dd_by_id(9), elevage.get_dd_by_id(1))
+    print(str(new_dd2))
+
     #print(str(elevage))
