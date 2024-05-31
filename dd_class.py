@@ -178,16 +178,33 @@ class Elevage:
             result[couleur] += p * poids2
         return result   
         
-    def croisement(self, dinde1:Dragodinde, dinde2:Dragodinde) -> dict :
+    def croisement_parents(self, dinde1: Dragodinde, dinde2: Dragodinde, niveau: int, poids: float):
         """
-        Appel les autres fonctions en fonction 
-        du type de couleur de croisement et de l'ordre de la gealogie :
-        génération                   : parents > grand parents > arrière grand parents
-        multiplicateur de génération :   50%   >      30%      >       20%   
-        Dans le cas ou il manque un parents on a une redistribution des
-        probabilité au couches d'en dessous de facon équivalent, ex :
-        Pas de arrière grand parents : parent (60%), grand parents (40%)
+        Fonction auxiliaire pour gérer le croisement à un certain niveau généalogique.
         """
+        proba = defaultdict(float)
+        if dinde1.get_arbre_genealogique() and dinde2.get_arbre_genealogique():
+            list_couleur_dinde1 = dinde1.get_arbre_genealogique()[niveau]
+            list_couleur_dinde2 = dinde2.get_arbre_genealogique()[niveau]
+            
+            for couleur1, couleur2 in zip(list_couleur_dinde1, list_couleur_dinde2):
+                if couleur1 and couleur2:
+                    if self.check_couleur(couleur1, couleur2):
+                        proba = self.combiner_probabilites(proba, self.croisement_mono_mono(couleur1, couleur2), 1.0, poids)
+                    else:
+                        proba = self.combiner_probabilites(proba, self.croisement_monobi_bibi(couleur1, couleur2), 1.0, poids)
+        return proba
+    
+    def croisement(self, dinde1: Dragodinde, dinde2: Dragodinde) -> dict :
+        """
+        Appel les autres fonctions en fonction du type de couleur de croisement et de l'ordre de la généalogie :
+        génération                   : parents > grands-parents > arrière-grands-parents
+        multiplicateur de génération :   50%   >      30%        >       20%   
+        Dans le cas où il manque un parent, on a une redistribution des
+        probabilités aux couches d'en dessous de façon équivalente, ex :
+        Pas d'arrière-grands-parents : parent (60%), grands-parents (40%)
+        """
+        
         couleur_dinde1 = dinde1.get_couleur()
         couleur_dinde2 = dinde2.get_couleur()
         
@@ -195,61 +212,24 @@ class Elevage:
             proba_directe = self.croisement_mono_mono(couleur_dinde1, couleur_dinde2)
         else:
             proba_directe = self.croisement_monobi_bibi(couleur_dinde1, couleur_dinde2)
+        
+        proba_parents = self.croisement_parents(dinde1, dinde2, 0, 0.5)
+        proba_grandparents = self.croisement_parents(dinde1, dinde2, 1, 0.3)
+        proba_great_grandparents = self.croisement_parents(dinde1, dinde2, 2, 0.2)
 
-        # Croisement des parents
-        proba_parents = defaultdict(float)
-        if dinde1.get_arbre_genealogique() and dinde2.get_arbre_genealogique():
-            list_Gcouleur_dinde1 = dinde1.get_arbre_genealogique()[0] # Parents only
-            list_Gcouleur_dinde2 = dinde2.get_arbre_genealogique()[0] # Parents only
-
-            for couleur_parent1, couleur_parent2 in zip(list_Gcouleur_dinde1, list_Gcouleur_dinde2) :
-                #Check case where there are no parents
-                if couleur_parent1 and couleur_parent2:
-                    if self.check_couleur(couleur_parent1, couleur_parent2):
-                        proba_parents = self.combiner_probabilites(proba_parents, self.croisement_mono_mono(couleur_parent1, couleur_parent2), 1.0, 0.5)
-                    else:
-                        proba_parents = self.combiner_probabilites(proba_parents, self.croisement_monobi_bibi(couleur_parent1, couleur_parent2), 1.0, 0.5)
-    
-        # Croisement des grands-parents
-        proba_grandparents = defaultdict(float)
-        if dinde1.get_arbre_genealogique() and dinde2.get_arbre_genealogique():
-            list_Gcouleur_dinde1 = dinde1.get_arbre_genealogique()[1] # Grandparents only
-            list_Gcouleur_dinde2 = dinde2.get_arbre_genealogique()[1] # Grandparents only
-            
-            for gcouleur_parent1, gcouleur_parent2 in zip(list_Gcouleur_dinde1, list_Gcouleur_dinde2) :
-                if gcouleur_parent1 and gcouleur_parent2:
-                    if self.check_couleur(gcouleur_parent1, gcouleur_parent2):
-                        proba_grandparents = self.combiner_probabilites(proba_grandparents, self.croisement_mono_mono(gcouleur_parent1, gcouleur_parent2), 1.0, 0.3)
-                    else:
-                        proba_grandparents = self.combiner_probabilites(proba_grandparents, self.croisement_monobi_bibi(gcouleur_parent1, gcouleur_parent2), 1.0, 0.3)
-    
-        # Croisement des arrière-grands-parents
-        proba_great_grandparents = defaultdict(float)
-        if dinde1.get_arbre_genealogique() and dinde2.get_arbre_genealogique():
-            list_AGcouleur_dinde1 = dinde1.get_arbre_genealogique()[2] # Great-grandparents only
-            list_AGcouleur_dinde2 = dinde2.get_arbre_genealogique()[2] # Great-grandparents only
-            
-            for ggcouleur_parent1, ggcouleur_parent2 in zip(list_AGcouleur_dinde1, list_AGcouleur_dinde2) :
-                #Check case where there are no parents
-                if ggcouleur_parent1 and ggcouleur_parent2:
-                    if self.check_couleur(ggcouleur_parent1, ggcouleur_parent2):
-                        proba_great_grandparents = self.combiner_probabilites(proba_great_grandparents, self.croisement_mono_mono(ggcouleur_parent1, ggcouleur_parent2), 1.0, 0.2)
-                    else:
-                        proba_great_grandparents = self.combiner_probabilites(proba_great_grandparents, self.croisement_monobi_bibi(ggcouleur_parent1, ggcouleur_parent2), 1.0, 0.2)
-    
         # Combinaison des probabilités
-        if proba_grandparents and proba_great_grandparents :
+        if proba_grandparents and proba_great_grandparents:
             proba_finale = self.combiner_probabilites(proba_directe, proba_parents, 0.5, 0.5)
             proba_finale = self.combiner_probabilites(proba_finale, proba_grandparents, 1.0, 0.3)
             proba_finale = self.combiner_probabilites(proba_finale, proba_great_grandparents, 1.0, 0.2)
 
-        elif proba_grandparents and not proba_great_grandparents :
+        elif proba_grandparents and not proba_great_grandparents:
             proba_finale = self.combiner_probabilites(proba_directe, proba_parents, 0.5, 0.6)
             proba_finale = self.combiner_probabilites(proba_finale, proba_grandparents, 1.0, 0.4)
 
-        else :
+        else:
             proba_finale = self.combiner_probabilites(proba_directe, proba_parents, 1.0, 1.0)
-
+        
         return dict(proba_finale)
 
     def choice_color(self, probabilities) :
