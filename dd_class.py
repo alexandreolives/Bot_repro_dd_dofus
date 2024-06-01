@@ -91,10 +91,71 @@ class Dragodinde:
                 f"Génération: {self.generation}\n"
                 f"Nombre de reproductions: {self.nombre_reproductions}\n")
 
-class Elevage:
-    def __init__(self):
-        self.dragodindes = []
+class Generation:
+    def __init__(self, number_generation: int, monocolor: bool, colors: list):
+        self.number_generation = number_generation
+        self.monocolor = monocolor
+        self.colors = colors
 
+    def get_number_generation(self):
+        return self.number_generation
+
+    def get_monocolor(self):
+        return self.monocolor
+
+    def get_colors(self):
+        return self.colors
+    
+class Generations:
+    def __init__(self):
+        self.generations = self.initialize_generations()
+
+    def get_generations(self):
+        return [str(gen) for gen in self.generations]
+    
+    def get_generation_by_color(self, color: str) -> int:
+        for generation in self.generations:
+            if color in generation.get_colors():
+                return generation.get_number_generation()
+        return None
+    
+    def initialize_generations(self):
+        # Data for each generation
+        generations_data = [
+            (1, True, ["Rousse", "Amande", "Dorée"]),
+            (2, False, ["Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"]),
+            (3, True, ["Indigo", "Ebène"]),
+            (4, False, ["Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène", 
+                        "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"]),
+            (5, True, ["Pourpre", "Orchidée"]),
+            (6, False, ["Pourpre et Rousse", "Orchidée et Rousse", "Amande et Pourpre", "Amande et Orchidée", 
+                        "Dorée et Pourpre", "Dorée et Orchidée", "Indigo et Pourpre", "Indigo et Orchidée", 
+                        "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"]),
+            (7, True, ["Ivoire", "Turquoise"]),
+            (8, False, ["Ivoire et Rousse", "Turquoise et Rousse", "Amande et Ivoire", "Amande et Turquoise", 
+                        "Dorée et Ivoire", "Dorée et Turquoise", "Indigo et Ivoire", "Indigo et Turquoise", 
+                        "Ebène et Ivoire", "Ebène et Turquoise", "Pourpre et Ivoire", "Turquoise et Pourpre", 
+                        "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"]),
+            (9, True, ["Emeraude", "Prune"]),
+            (10, False, ["Rousse et Emeraude", "Rousse et Prune", "Amande et Emeraude", "Amande et Prune", 
+                         "Dorée et Emeraude", "Dorée et Prune", "Indigo et Emeraude", "Indigo et Prune", 
+                         "Ebène et Emeraude", "Ebène et Prune", "Pourpre et Emeraude", "Pourpre et Prune", 
+                         "Orchidée et Emeraude", "Orchidée et Prune", "Ivoire et Emeraude", "Ivoire et Prune", 
+                         "Turquoise et Emeraude", "Turquoise et Prune"])
+        ]
+
+        generations = []
+        # Add each generation to the Generations object
+        for number, monocolor, colors in generations_data:
+            generation = Generation(number, monocolor, colors)
+            generations.append(generation)
+
+        return generations
+
+class Elevage:
+    def __init__(self, dragodindes:list) :
+        self.dragodindes = dragodindes
+        self.generations = Generations()
         self.special_cases = {
             "Rousse et Dorée": ["Indigo", "Orchidée"],
             "Amande et Dorée": ["Indigo", "Ebène"],
@@ -167,7 +228,7 @@ class Elevage:
 
         return proba
 
-    def combiner_probabilites(self, proba1, proba2, poids1, poids2):
+    def combiner_probabilites(self, proba1:float, proba2:float, poids1:float, poids2:float):
         """
         Combine les probabilités de deux dictionnaires en utilisant des poids donnés.
         """
@@ -239,19 +300,9 @@ class Elevage:
         selected_event = random.choices(events, weights=weights, k=1)[0]
         return selected_event
     
-    def get_generation(self, color: str, male: Dragodinde, female: Dragodinde) -> int:
-        color_m, generation_m = male.get_couleur(), male.get_generation()
-        color_f, generation_f = female.get_couleur(), female.get_generation()
+    def get_generation(self, color: str) -> int:
+        return self.generations.get_generation_by_color(color)
 
-        if color != color_m and color != color_f :
-            return max(generation_m, generation_f)+1
-        
-        elif color == color_m :
-            return generation_m
-        
-        else :
-            return generation_f
-        
     def accouplement_naissance(self, male:Dragodinde, female:Dragodinde) -> Dragodinde :
         if male and female :
             if male.get_sex() != female.get_sex() :
@@ -276,14 +327,14 @@ class Elevage:
                 print("dic probabilité : ", dic_probability)
 
                 couleur = self.choice_color(dic_probability)
-                generation = self.get_generation(couleur, male, female)
+                generation = self.get_generation(couleur)
 
                 nouvelle_dd = Dragodinde(nouvel_id, sexe, couleur, generation, nouvel_arbre_genealogique)
                 self.naissance(nouvelle_dd)
                 self.check_mort(male)
                 self.check_mort(female)
 
-                return nouvelle_dd
+                return nouvelle_dd, dic_probability
             
             else :
                 print("error : dd1 and dd2 are of the same sex")
@@ -307,29 +358,3 @@ class Genealogie:
     
     def get_parents_and_grandparents(self) :
         return [self.parents, self.grandparents, self.great_grandparents]
-
-class Generation:
-    def __init__(self, number_generation: int, monocolor: bool, colors: list):
-        self.number_generation = number_generation
-        self.monocolor = monocolor
-        self.colors = colors
-
-    def get_number_generation(self):
-        return self.number_generation
-
-    def get_monocolor(self):
-        return self.monocolor
-
-    def get_colors(self):
-        return self.colors
-    
-class Generations:
-    def __init__(self):
-        self.generations = []
-        self.links = {}
-
-    def add_generation(self, generation):
-        self.generations.append(generation)
-
-    def get_generations(self):
-        return [str(gen) for gen in self.generations]
