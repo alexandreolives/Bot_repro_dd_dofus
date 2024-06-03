@@ -208,8 +208,8 @@ class Elevage:
 
     def croisement_monobi_bibi(self, couleur_A: str, couleur_B: str):
         """
-        Croisement : bi couleur (A) X bi couleur (B):
-        (50% bicolor (A))(50% bi (B))
+        Croisement : bi/mono couleur (A) X bi couleur (B):
+        (50% bi/monocolor (A))(50% bi (B))
         """
         proba = defaultdict(float)
         if couleur_A in self.special_cases and couleur_B in self.special_cases :
@@ -292,7 +292,7 @@ class Elevage:
             proba_finale = self.combiner_probabilites(proba_directe, proba_parents, 1.0, 1.0)
         
         return dict(proba_finale)
-
+    
     def choice_color(self, probabilities) :
         # Liste des événements et des poids correspondants
         events = list(probabilities.keys())
@@ -303,20 +303,20 @@ class Elevage:
     def get_generation(self, color: str) -> int:
         return self.generations.get_generation_by_color(color)
 
+    def check_proba(self, dict_proba:dict) :
+        if sum(dict_proba.values()) != 1.0 :
+            raise ValueError("Error : The sum of dict_prob isn't equal to 1")
+
     def accouplement_naissance(self, male:Dragodinde, female:Dragodinde) -> Dragodinde :
         if male and female :
             if male.get_sex() != female.get_sex() :
                 male.add_reproduction()
                 female.add_reproduction()
                 nouvel_id = len(self.dragodindes) + 1
-                ancetres_male_gparent = male.get_arbre_genealogique()[0]
-                ancetres_female_gparent = female.get_arbre_genealogique()[0]
-                ancetres_gparent = ancetres_male_gparent + ancetres_female_gparent
+                ancetres_gparent = male.get_arbre_genealogique()[0] + female.get_arbre_genealogique()[0]
                 print("ancetres_gparent : ", ancetres_gparent)
 
-                ancetres_male_ggparent = male.get_arbre_genealogique()[1]
-                ancetres_female_ggparent = female.get_arbre_genealogique()[1]
-                ancetres_ggparent = ancetres_male_ggparent + ancetres_female_ggparent
+                ancetres_ggparent = male.get_arbre_genealogique()[1] + female.get_arbre_genealogique()[1]
                 print("ancetres_ggparent : ", ancetres_ggparent)
 
                 nouvel_arbre_genealogique = Genealogie([male.couleur, female.couleur], ancetres_gparent , ancetres_ggparent)
@@ -325,6 +325,7 @@ class Elevage:
                 sexe = random.choice(['M', 'F'])
                 dic_probability = self.croisement(male, female)
                 print("dic probabilité : ", dic_probability)
+                self.check_proba(dic_probability)
 
                 couleur = self.choice_color(dic_probability)
                 generation = self.get_generation(couleur)
@@ -337,11 +338,10 @@ class Elevage:
                 return nouvelle_dd, dic_probability
             
             else :
-                print("error : dd1 and dd2 are of the same sex")
+                raise ValueError("Error : Cannot breed dragodindes of the same sex.")        
         else :
-            print("error : dd not exist")
-        
-        return None
+            raise ValueError("Error : dragodindes not exis")
+
 class Genealogie:
     def __init__(self, parents=[None, None], 
                  grandparents=[None, None, None, None],

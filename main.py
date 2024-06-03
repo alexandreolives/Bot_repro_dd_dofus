@@ -28,9 +28,9 @@ if __name__ == "__main__" :
     print(str(new_dd))
     print(" ")
     if new_dd.get_sex() == "F" : 
-        new_dd2 = elevage.accouplement_naissance(elevage.get_dd_by_id(9), elevage.get_dd_by_id(3))
+        new_dd2, _ = elevage.accouplement_naissance(elevage.get_dd_by_id(9), elevage.get_dd_by_id(3))
     else :
-        new_dd2 = elevage.accouplement_naissance(elevage.get_dd_by_id(9), elevage.get_dd_by_id(4))
+        new_dd2, _ = elevage.accouplement_naissance(elevage.get_dd_by_id(9), elevage.get_dd_by_id(4))
     print(str(new_dd2))
 
     #print(str(elevage))
