@@ -260,7 +260,7 @@ class Elevage:
         """
         Appel les autres fonctions en fonction du type de couleur de croisement et de l'ordre de la généalogie :
         génération                   : parents > grands-parents > arrière-grands-parents
-        multiplicateur de génération :   50%   >      30%        >       20%   
+        multiplicateur de génération :   50%   >      30%       >       20%   
         Dans le cas où il manque un parent, on a une redistribution des
         probabilités aux couches d'en dessous de façon équivalente, ex :
         Pas d'arrière-grands-parents : parent (60%), grands-parents (40%)
@@ -278,20 +278,28 @@ class Elevage:
         proba_grandparents = self.croisement_parents(dinde1, dinde2, 1, 0.3)
         proba_great_grandparents = self.croisement_parents(dinde1, dinde2, 2, 0.2)
 
-        # Combinaison des probabilités
-        if proba_grandparents and proba_great_grandparents:
-            proba_finale = self.combiner_probabilites(proba_directe, proba_parents, 0.5, 0.5)
-            proba_finale = self.combiner_probabilites(proba_finale, proba_grandparents, 1.0, 0.3)
-            proba_finale = self.combiner_probabilites(proba_finale, proba_great_grandparents, 1.0, 0.2)
-
-        elif proba_grandparents and not proba_great_grandparents:
-            proba_finale = self.combiner_probabilites(proba_directe, proba_parents, 0.5, 0.6)
-            proba_finale = self.combiner_probabilites(proba_finale, proba_grandparents, 1.0, 0.4)
-
-        else:
-            proba_finale = self.combiner_probabilites(proba_directe, proba_parents, 1.0, 1.0)
+        total_weight = 1.0
+        combined_probabilities = proba_directe
         
-        return dict(proba_finale)
+        if proba_parents:
+            combined_probabilities = self.combiner_probabilites(combined_probabilities, proba_parents, total_weight, 0.5)
+            total_weight += 0.5
+        
+        if proba_grandparents:
+            # Adjust weight for grandparents if great-grandparents are missing
+            adjusted_weight_grandparents = 0.3 if proba_great_grandparents else 0.5
+            combined_probabilities = self.combiner_probabilites(combined_probabilities, proba_grandparents, total_weight, adjusted_weight_grandparents)
+            total_weight += adjusted_weight_grandparents
+
+        if proba_great_grandparents:
+            combined_probabilities = self.combiner_probabilites(combined_probabilities, proba_great_grandparents, total_weight, 0.2)
+            total_weight += 0.2
+        
+        # Normalize the combined probabilities to ensure they sum to 1
+        total_prob_sum = sum(combined_probabilities.values())
+        normalized_probabilities = {key: value / total_prob_sum for key, value in combined_probabilities.items()}
+        
+        return dict(normalized_probabilities)
     
     def choice_color(self, probabilities) :
         # Liste des événements et des poids correspondants
@@ -338,9 +346,9 @@ class Elevage:
                 return nouvelle_dd, dic_probability
             
             else :
-                raise ValueError("Error : Cannot breed dragodindes of the same sex.")        
+                raise ValueError("Cannot breed dragodindes of the same sex.")        
         else :
-            raise ValueError("Error : dragodindes not exis")
+            raise ValueError("Dragodindes not exist")
 
 class Genealogie:
     def __init__(self, parents=[None, None], 

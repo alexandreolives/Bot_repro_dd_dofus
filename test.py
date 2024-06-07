@@ -1,5 +1,4 @@
 import dd_class
-#import Bot_repro_dd_dofus.DQNAgent
 
 def creat_elevage() :
 
