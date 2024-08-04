@@ -1,4 +1,5 @@
 from collections import defaultdict 
+import random 
 
 class Dragodinde:
     def __init__(self, id : int, sex: str, couleur: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
