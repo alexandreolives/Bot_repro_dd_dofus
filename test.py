@@ -84,11 +84,11 @@ class TestCrosing(unittest.TestCase):
 
         self.gp9 = dd_class.Node("Dorée et Emeraude", None, self.ggp5, self.ggp6)
         self.gp10 = dd_class.Node("Orchidée et Emeraude", None, self.ggp7, self.ggp8)
-        self.p5 = dd_class.Node("Indigo et Ebène", 0.5, self.gp9, self.gp10)
+        self.p5 = dd_class.Node("Indigo et Ebène", None, self.gp9, self.gp10)
 
         self.gp11 = dd_class.Node("Amande et Ivoire")
         self.gp12 = dd_class.Node("Indigo et Ivoire")        
-        self.p6 = dd_class.Node("Ivoire et Prune", 0.5, self.gp11, self.gp12)
+        self.p6 = dd_class.Node("Ivoire et Prune", None, self.gp11, self.gp12)
 
         self.ind_2 = dd_class.Node("Pourpre et Orchidée", None, self.p5, self.p6)
         self.genealogie_4 = dd_class.Genealogie(self.ind_2)
@@ -112,8 +112,6 @@ class TestCrosing(unittest.TestCase):
             }
 
         print("dic_probability : ", dic_probability)
-
-        # Convert probabilities to percentages if needed
         dic_probability = {k: v * 100 for k, v in dic_probability.items()}
 
         print("formatted_dic_probability : ", dic_probability)

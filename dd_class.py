@@ -188,18 +188,28 @@ class Elevage:
         """
         # Special case where both bicolor dd can try the get a mono color baby
         if couleur_A in self.special_cases and couleur_B in self.special_cases :
+
+            print("couleur_A : ", couleur_A)
+            print("couleur_B : ", couleur_B)
+
             set1 = set(self.special_cases[couleur_A])
             set2 = set(self.special_cases[couleur_B])
+
+            print("set1 : ", set1)
+            print("set2 : ", set2)
+
             intersection = set1 & set2
+            print("intersection : ", intersection)
+
             if intersection :
-                color_prob[intersection.pop()] = color_prob.get(intersection.pop(), 0) + 0.10 * weight_A * weight_B
+                print("intersection : ", next(iter(intersection)))
+                color_prob[next(iter(intersection))] = color_prob.get(next(iter(intersection)), 0) + 0.10 * weight_A * weight_B
                 color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 0.45 * weight_A * weight_B
                 color_prob[couleur_B] = color_prob.get(couleur_B, 0) + 0.45 * weight_A * weight_B
-        
-        # Case momo/bi or bi/bi not special case
-        else:
-            color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 0.50 * weight_A * weight_B
-            color_prob[couleur_B] = color_prob.get(couleur_B, 0) + 0.50 * weight_A * weight_B
+                return color_prob
+
+        color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 0.50 * weight_A * weight_B
+        color_prob[couleur_B] = color_prob.get(couleur_B, 0) + 0.50 * weight_A * weight_B
 
         return color_prob
         
