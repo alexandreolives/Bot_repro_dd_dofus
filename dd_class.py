@@ -1,10 +1,11 @@
 import random
 from collections import defaultdict 
-import numpy as np
+import math
 
 """
-import gym
 from gym import spaces
+import numpy as np
+
 
 class Environnement(gym.Env):
     def __init__(self):
@@ -50,6 +51,7 @@ class Environnement(gym.Env):
     def render(self, mode='human'):
         print(f"Generation: {self.generation}, State: {self.state}")
 """
+
 class Dragodinde:
     def __init__(self, id : int, sex: str, couleur: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
         self.id = id
@@ -71,12 +73,9 @@ class Dragodinde:
     def get_generation(self):
         return self.generation
     
-    def set_arbre_genealogique(self, arbre_genealogique):
-        self.arbre_genealogique = arbre_genealogique
-
     def get_arbre_genealogique(self):
-        return self.arbre_genealogique.get_parents_and_grandparents()
-
+        return self.arbre_genealogique.get_node()
+    
     def get_nombre_reproductions(self) :
         return self.nombre_reproductions
     
@@ -151,8 +150,8 @@ class Generations:
             generations.append(generation)
 
         return generations
+class Elevage:  
 
-class Elevage:
     def __init__(self, dragodindes:list) :
         self.dragodindes = dragodindes
         self.generations = Generations()
@@ -256,51 +255,27 @@ class Elevage:
                         proba = self.combiner_probabilites(proba, self.croisement_monobi_bibi(couleur1, couleur2), 1.0, poids)
         return proba
     
-    def croisement(self, dinde1: Dragodinde, dinde2: Dragodinde) -> dict :
-        """
-        Appel les autres fonctions en fonction du type de couleur de croisement et de l'ordre de la généalogie :
-        génération                   : parents > grands-parents > arrière-grands-parents
-        multiplicateur de génération :   50%   >      30%       >       20%   
-        Dans le cas où il manque un parent, on a une redistribution des
-        probabilités aux couches d'en dessous de façon équivalente, ex :
-        Pas d'arrière-grands-parents : parent (60%), grands-parents (40%)
-        """
+    def croisement(self, dinde_m: Dragodinde, dinde_f: Dragodinde) -> dict :
         
-        couleur_dinde1 = dinde1.get_couleur()
-        couleur_dinde2 = dinde2.get_couleur()
-        
-        if self.check_couleur(couleur_dinde1, couleur_dinde2):
-            proba_directe = self.croisement_mono_mono(couleur_dinde1, couleur_dinde2)
-        else:
-            proba_directe = self.croisement_monobi_bibi(couleur_dinde1, couleur_dinde2)
-        
-        proba_parents = self.croisement_parents(dinde1, dinde2, 0, 0.5)
-        proba_grandparents = self.croisement_parents(dinde1, dinde2, 1, 0.3)
-        proba_great_grandparents = self.croisement_parents(dinde1, dinde2, 2, 0.2)
+        node_list_dinde_m = dinde_m.get_arbre_genealogique().get_all_nodes()
+        node_list_dinde_f = dinde_f.get_arbre_genealogique().get_all_nodes()
+        dic_dinde_m = dict()
+        dic_dinde_f = dict()
+        color_prob = dict()
 
-        total_weight = 1.0
-        combined_probabilities = proba_directe
+        for node_m, node_f in zip(node_list_dinde_m, node_list_dinde_f) : 
+            dic_dinde_m[node_m.get_color()] += node_m.get_weight()
+            dic_dinde_f[node_f.get_color()] += node_f.get_weight()
         
-        if proba_parents:
-            combined_probabilities = self.combiner_probabilites(combined_probabilities, proba_parents, total_weight, 0.5)
-            total_weight += 0.5
+        # Do crossing
+        for color_m, weight_m in dic_dinde_m.items() :
+            for color_f, weight_f in dic_dinde_f.items() :
+                male = [color_m, weight_m]
+                femelle = [color_f, weight_f]
+                color_prob = self.croisement_parents(male, femelle)
         
-        if proba_grandparents:
-            # Adjust weight for grandparents if great-grandparents are missing
-            adjusted_weight_grandparents = 0.3 if proba_great_grandparents else 0.5
-            combined_probabilities = self.combiner_probabilites(combined_probabilities, proba_grandparents, total_weight, adjusted_weight_grandparents)
-            total_weight += adjusted_weight_grandparents
+        return color_prob
 
-        if proba_great_grandparents:
-            combined_probabilities = self.combiner_probabilites(combined_probabilities, proba_great_grandparents, total_weight, 0.2)
-            total_weight += 0.2
-        
-        # Normalize the combined probabilities to ensure they sum to 1
-        total_prob_sum = sum(combined_probabilities.values())
-        normalized_probabilities = {key: value / total_prob_sum for key, value in combined_probabilities.items()}
-        
-        return dict(normalized_probabilities)
-    
     def choice_color(self, probabilities) :
         # Liste des événements et des poids correspondants
         events = list(probabilities.keys())
@@ -315,54 +290,121 @@ class Elevage:
         if sum(dict_proba.values()) != 1.0 :
             raise ValueError("Error : The sum of dict_prob isn't equal to 1")
 
-    def accouplement_naissance(self, male:Dragodinde, female:Dragodinde) -> Dragodinde :
-        if male and female :
-            if male.get_sex() != female.get_sex() :
-                male.add_reproduction()
-                female.add_reproduction()
-                nouvel_id = len(self.dragodindes) + 1
-                ancetres_gparent = male.get_arbre_genealogique()[0] + female.get_arbre_genealogique()[0]
-                print("ancetres_gparent : ", ancetres_gparent)
+    def accouplement_naissance(self, male: Dragodinde, female: Dragodinde):
+        if male is None or female is None:
+            raise ValueError("One or both of the Dragodindes do not exist.")
 
-                ancetres_ggparent = male.get_arbre_genealogique()[1] + female.get_arbre_genealogique()[1]
-                print("ancetres_ggparent : ", ancetres_ggparent)
+        if male.get_sex() == female.get_sex():
+            raise ValueError("Cannot breed dragodindes of the same sex.")
 
-                nouvel_arbre_genealogique = Genealogie([male.couleur, female.couleur], ancetres_gparent , ancetres_ggparent)
-                print("nouvel_arbre_genealogique : ", nouvel_arbre_genealogique)
+        male.add_reproduction()
+        female.add_reproduction()
+        nouvel_id = len(self.dragodindes) + 1
 
-                sexe = random.choice(['M', 'F'])
-                dic_probability = self.croisement(male, female)
-                print("dic probabilité : ", dic_probability)
-                self.check_proba(dic_probability)
+        parent_m = male.get_arbre_genealogique()
+        parent_f = female.get_arbre_genealogique()
 
-                couleur = self.choice_color(dic_probability)
-                generation = self.get_generation(couleur)
+        sexe = random.choice(['M', 'F'])
+        dic_probability = self.croisement(male, female)
+        self.check_proba(dic_probability)
+        couleur = self.choice_color(dic_probability)
+        generation = self.get_generation(couleur)
 
-                nouvelle_dd = Dragodinde(nouvel_id, sexe, couleur, generation, nouvel_arbre_genealogique)
-                self.naissance(nouvelle_dd)
-                self.check_mort(male)
-                self.check_mort(female)
+        new_ind = Node(couleur, 0.5, parent_m, parent_f)
+        nouvel_arbre_genealogique = Genealogie(new_ind)
 
-                return nouvelle_dd, dic_probability
-            
-            else :
-                raise ValueError("Cannot breed dragodindes of the same sex.")        
-        else :
-            raise ValueError("Dragodindes not exist")
+        nouvelle_dd = Dragodinde(nouvel_id, sexe, couleur, generation, nouvel_arbre_genealogique)
+        self.naissance(nouvelle_dd)
+        self.check_mort(male)
+        self.check_mort(female)
+
+        return nouvelle_dd, dic_probability
+
+class Node:
+    def __init__(self, color=None, weight=None, ancestor_m=None, ancestor_f=None):
+        self.color = color
+        self.weight = weight
+        self.ancestor_m = ancestor_m
+        self.ancestor_f = ancestor_f
+
+    def get_color(self):
+        return self.color
+
+    def set_color(self, color):
+        self.color = color
+
+    def get_ancestor_m(self):
+        return self.ancestor_m
+
+    def get_ancestor_f(self):
+        return self.ancestor_f
+
+    def set_weight(self, weight):
+        self.weight = weight
+
+    def get_weight(self):
+        return self.weight
 
 class Genealogie:
-    def __init__(self, parents=[None, None], 
-                 grandparents=[None, None, None, None],
-                 great_grandparents=[None] * 8) :
-        
-        self.parents = parents  # [father, mother]
-        self.grandparents = grandparents  # [paternal grandfather, paternal grandmother, maternal grandfather, maternal grandmother]
-        self.great_grandparents = great_grandparents # [four pairs of great-grandparents]
+    def __init__(self, root_node=None):
+        self.root_node = root_node
 
-    def __str__(self) :
-        return (f"parents: {self.parents}\n"
-                f"grand parents: {self.grandparents}\n"
-                f"grand grand parents: {self.great_grandparents}")
+    def get_node(self) :
+        return self.root_node
+
+    def init_weight(self, node, current_level, dic_weight_level):
+        if current_level > 3 or node is None:
+            return
+
+        node.set_weight(dic_weight_level[current_level])
+
+        parents = [node.get_ancestor_m(), node.get_ancestor_f()]
+        for i, parent in enumerate(parents):
+            if parent is None and current_level < 3:
+                parent = Node(node.get_color(), dic_weight_level[current_level+1])
+                if i == 0:
+                    node.ancestor_m = parent
+                else:
+                    node.ancestor_f = parent
+            self.init_weight(parent, current_level + 1, dic_weight_level)
+
+    def update_weights_and_colors(self):
+        dic_weight_level = {0: 0.5, 1: 0.125, 2: 0.0375, 3: 0.0125}
+        self.init_weight(self.root_node, 0, dic_weight_level)
+
+    def get_ancestors_at_level(self, node, current_level, level):
+        if node is None:
+            return []
+        if current_level == level:
+            return [node.get_color()]
+        else:
+            ancestors = []
+            ancestors += self.get_ancestors_at_level(node.get_ancestor_m(), current_level + 1, level)
+            ancestors += self.get_ancestors_at_level(node.get_ancestor_f(), current_level + 1, level)
+            return ancestors
+
+    def get_genealogie(self, level):
+        return self.get_ancestors_at_level(self.root_node, 0, level)
+
+    def traverse_genealogy(self, node, nodes_list):
+            if node is None:
+                return
+            nodes_list.append(node)
+            self.traverse_genealogy(node.get_ancestor_m(), nodes_list)
+            self.traverse_genealogy(node.get_ancestor_f(), nodes_list)
+
+    def get_all_nodes(self):
+        nodes_list = []
+        self.traverse_genealogy(self.root_node, nodes_list)
+        return nodes_list
     
-    def get_parents_and_grandparents(self) :
-        return [self.parents, self.grandparents, self.great_grandparents]
+    def __str__(self):
+        return (f"individu: {self.get_genealogie(0)}\n"
+                f"parents: {self.get_genealogie(1)}\n"
+                f"grand parents: {self.get_genealogie(2)}\n"
+                f"great-grand parents: {self.get_genealogie(3)}")
+    
+# class Genealogie:
+
+#     def get_parents_and_grandparents(self) :
+#         return [self.get_str_p(self.parents), self.get_str_p(self.grandparents), self.get_str_p(self.great_grandparents)]
