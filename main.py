@@ -10,9 +10,7 @@ def create_elevage():
         (3, "M", "Amande", 1),
         (4, "F", "Amande", 1),
         (5, "M", "Dorée", 1),
-        (6, "F", "Dorée", 1),
-        (7, "M", "Amande et Dorée", 2),
-        (8, "F", "Rousse et Dorée", 2)
+        (6, "F", "Dorée", 1)
     ]
 
     list_dd = []
@@ -32,5 +30,3 @@ if __name__ == "__main__" :
     else :
         new_dd2, _ = elevage.accouplement_naissance(elevage.get_dd_by_id(9), elevage.get_dd_by_id(4))
     print(str(new_dd2), dic_prob)
-
-    #print(str(elevage))

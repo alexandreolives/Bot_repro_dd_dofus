@@ -1,6 +1,6 @@
 import random
 from collections import defaultdict 
-import math
+import csv
 
 class Dragodinde:
     def __init__(self, id : int, sex: str, couleur: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
@@ -69,7 +69,7 @@ class Generations:
         return None
     
     def initialize_generations(self):
-        # Data for each generation
+
         generations_data = [
             (1, True, ["Rousse", "Amande", "Dorée"]),
             (2, False, ["Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"]),
@@ -92,9 +92,8 @@ class Generations:
                          "Orchidée et Emeraude", "Orchidée et Prune", "Ivoire et Emeraude", "Ivoire et Prune", 
                          "Turquoise et Emeraude", "Turquoise et Prune"])
         ]
-
         generations = []
-        # Add each generation to the Generations object
+
         for number, monocolor, colors in generations_data:
             generation = Generation(number, monocolor, colors)
             generations.append(generation)
@@ -102,7 +101,7 @@ class Generations:
         return generations
 class Elevage:  
 
-    def __init__(self, dragodindes:list) :
+    def __init__(self, dragodindes : list) :
         self.dragodindes = dragodindes
         self.generations = Generations()
         self.special_cases = {
@@ -117,6 +116,23 @@ class Elevage:
             "Ivoire et Turquoise": ["Prune", "Emeraude"],
             "Pourpre et Ivoire": ["Emeraude"]
         }
+        self.list_bicolor_dd = self.list_bicolor_dd = [
+            "Rousse et Amande", "Rousse et Dorée", "Amande et Dorée",
+            "Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène",
+            "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène",
+            "Pourpre et Rousse", "Orchidée et Rousse", "Amande et Pourpre", "Amande et Orchidée",
+            "Dorée et Pourpre", "Dorée et Orchidée", "Indigo et Pourpre", "Indigo et Orchidée",
+            "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée",
+            "Ivoire et Rousse", "Turquoise et Rousse", "Amande et Ivoire", "Amande et Turquoise",
+            "Dorée et Ivoire", "Dorée et Turquoise", "Indigo et Ivoire", "Indigo et Turquoise",
+            "Ebène et Ivoire", "Ebène et Turquoise", "Pourpre et Ivoire", "Turquoise et Pourpre",
+            "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise",
+            "Rousse et Emeraude", "Rousse et Prune", "Amande et Emeraude", "Amande et Prune",
+            "Dorée et Emeraude", "Dorée et Prune", "Indigo et Emeraude", "Indigo et Prune",
+            "Ebène et Emeraude", "Ebène et Prune", "Pourpre et Emeraude", "Pourpre et Prune",
+            "Orchidée et Emeraude", "Orchidée et Prune", "Ivoire et Emeraude", "Ivoire et Prune",
+            "Turquoise et Emeraude", "Turquoise et Prune"
+        ]
 
     def __str__(self):
         return "\n".join(str(dragodinde) for dragodinde in self.dragodindes)
@@ -140,44 +156,52 @@ class Elevage:
     def check_couleur(self, couleur_A:str, couleur_B:str) -> bool :
         return True if " et " not in couleur_A and " et " not in couleur_B else False
     
-    def croisement_mono_mono(self, couleur_A: str, weight_A : float, couleur_B: str, weight_B : float):
+    def croisement_mono_mono(self, couleur_A: str, weight_A : float, couleur_B: str, weight_B : float, color_prob : defaultdict):
         """
         Croisement : mono couleur (A) X mono couleur (B) :
         (45% couleur (A))(45% couleur (B))(10% bicolor (A/B))
         """
-        proba = defaultdict(float)
         if couleur_A != couleur_B :
-            proba[couleur_A] = round(0.45 * weight_A * weight_B, 4)
-            proba[couleur_B] = round(0.45  * weight_A * weight_B, 4)
-            proba[f"{couleur_A} et {couleur_B}"] = round(0.10 * weight_A * weight_B, 4)
+            color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 0.45 * weight_A * weight_B
+            color_prob[couleur_B] = color_prob.get(couleur_B, 0) + 0.45 * weight_A * weight_B
+            
+            # Construct the bicolor key
+            bicolor_key_1 = f"{couleur_A} et {couleur_B}"
+            bicolor_key_2 = f"{couleur_B} et {couleur_A}"
 
-        else :
-            proba[couleur_A] = round(1.0 * weight_A * weight_B, 4)
-        return proba
+            # Check if the bicolor combination is in the list
+            if bicolor_key_1 in self.list_bicolor_dd:
+                color_prob[bicolor_key_1] = color_prob.get(bicolor_key_1, 0) + 0.10 * weight_A * weight_B
+            elif bicolor_key_2 in self.list_bicolor_dd:
+                color_prob[bicolor_key_2] = color_prob.get(bicolor_key_2, 0) + 0.10 * weight_A * weight_B
+            else :
+                raise ValueError(f"The combinaison of {couleur_A} and {couleur_B} didn't match any kind of bicolored dd")
+        else:
+            color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 1.0 * weight_A * weight_B
 
-    def croisement_monobi_bibi(self, couleur_A: str, weight_A : float, couleur_B: str, weight_B : float):
+        return color_prob
+
+    def croisement_monobi_bibi(self, couleur_A: str, weight_A : float, couleur_B: str, weight_B : float, color_prob : defaultdict):
         """
         Croisement : bi/mono couleur (A) X bi couleur (B):
         (50% bi/monocolor (A))(50% bi (B))
         """
-        proba = defaultdict(float)
-
         # Special case where both bicolor dd can try the get a mono color baby
         if couleur_A in self.special_cases and couleur_B in self.special_cases :
             set1 = set(self.special_cases[couleur_A])
             set2 = set(self.special_cases[couleur_B])
             intersection = set1 & set2
             if intersection :
-                proba[intersection.pop()] += round(0.10 * weight_A * weight_B, 4)
-                proba[couleur_A] += round(0.45 * weight_A * weight_B, 4)
-                proba[couleur_B] += round(0.45 * weight_A * weight_B, 4)
+                color_prob[intersection.pop()] = color_prob.get(intersection.pop(), 0) + 0.10 * weight_A * weight_B
+                color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 0.45 * weight_A * weight_B
+                color_prob[couleur_B] = color_prob.get(couleur_B, 0) + 0.45 * weight_A * weight_B
         
         # Case momo/bi or bi/bi not special case
         else:
-            proba[couleur_A] += round(0.50 * weight_A * weight_B, 4)
-            proba[couleur_B] += round(0.50 * weight_A * weight_B, 4)
+            color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 0.50 * weight_A * weight_B
+            color_prob[couleur_B] = color_prob.get(couleur_B, 0) + 0.50 * weight_A * weight_B
 
-        return proba
+        return color_prob
         
     def croisement(self, dinde_m: Dragodinde, dinde_f: Dragodinde) -> dict :
         
@@ -187,20 +211,21 @@ class Elevage:
         dic_dinde_f = dict()
         color_prob = defaultdict(float)
 
-        for node_m, node_f in zip(node_list_dinde_m, node_list_dinde_f) : 
-            dic_dinde_m[node_m.get_color()] += node_m.get_weight()
-            dic_dinde_f[node_f.get_color()] += node_f.get_weight()
-        
+        for node_m, node_f in zip(node_list_dinde_m, node_list_dinde_f) :
+            color_m, weight_m = node_m.get_color(), node_m.get_weight()
+            color_f, weight_f = node_f.get_color(), node_f.get_weight()
+
+            dic_dinde_m[color_m] = dic_dinde_m.get(color_m, 0) + weight_m
+            dic_dinde_f[color_f] = dic_dinde_f.get(color_f, 0) + weight_f
+
         # Do crossing
         for color_m, weight_m in dic_dinde_m.items() :
             for color_f, weight_f in dic_dinde_f.items() :
                 if self.check_couleur(color_m, color_f):
-                    print(color_prob)
-                    color_prob = self.croisement_mono_mono(color_m, weight_m, color_f, weight_f)
+                    color_prob = self.croisement_mono_mono(color_m, weight_m, color_f, weight_f, color_prob)
                 else:
-                    print(color_prob)
-                    color_prob = self.croisement_monobi_bibi(color_m, weight_m, color_f, weight_f)
-            
+                    color_prob = self.croisement_monobi_bibi(color_m, weight_m, color_f, weight_f, color_prob)
+                
         return color_prob
 
     def choice_color(self, probabilities) :
@@ -215,6 +240,9 @@ class Elevage:
     def get_generation(self, color: str) -> int:
         return self.generations.get_generation_by_color(color)
 
+    def round_dict_values(self, input_dict):
+        return {key: round(value, 4) for key, value in input_dict.items()}
+
     def accouplement_naissance(self, male: Dragodinde, female: Dragodinde):
         if male is None or female is None:
             raise ValueError("One or both of the Dragodindes do not exist.")
@@ -226,11 +254,9 @@ class Elevage:
         female.add_reproduction()
         nouvel_id = len(self.dragodindes) + 1
 
-        print("test 1m : ", male)
-        print("test 1f : ", female)
-
         sexe = random.choice(['M', 'F'])
-        dic_probability = self.croisement(male, female)
+        dic_probability = self.round_dict_values(self.croisement(male, female))
+       
         couleur = self.choice_color(dic_probability)
         generation = self.get_generation(couleur)
 
