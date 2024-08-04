@@ -1,6 +1,4 @@
-import random
 from collections import defaultdict 
-import csv
 
 class Dragodinde:
     def __init__(self, id : int, sex: str, couleur: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
@@ -116,6 +114,7 @@ class Elevage:
             "Ivoire et Turquoise": ["Prune", "Emeraude"],
             "Pourpre et Ivoire": ["Emeraude"]
         }
+
         self.list_bicolor_dd = self.list_bicolor_dd = [
             "Rousse et Amande", "Rousse et Dorée", "Amande et Dorée",
             "Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène",
