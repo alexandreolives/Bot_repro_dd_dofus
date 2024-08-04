@@ -2,56 +2,6 @@ import random
 from collections import defaultdict 
 import math
 
-"""
-from gym import spaces
-import numpy as np
-
-
-class Environnement(gym.Env):
-    def __init__(self):
-        super(Environnement, self).__init__()
-        self.action_space = spaces.Discrete(2)  # Exemple: 2 actions possibles (accouplement A ou B)
-        self.observation_space = spaces.Box(low=0, high=1, shape=(10,), dtype=np.float32)  # Exemple: état de 10 dimensions
-        self.state = self.reset()
-        self.generation = 0
-        self.max_generations = 10
-
-    def get_generation(self) :
-        return self.generation
-
-    def set_generation(self, actual_generation) :
-        self.generation = actual_generation
-    
-    def step(self, action):
-        assert self.action_space.contains(action)
-        reward = 0
-        done = False
-
-        # Simulez le croisement ici, mettez à jour self.state et reward
-        if action > self.generation:
-            reward = 1000
-            self.generation += 1
-
-        elif action == self.generation:
-            reward = 1
-
-        elif action < self.generation-2 :
-            reward = -1000
-
-        if self.generation == self.max_generations:
-            done = True
-
-        return np.array(self.state), reward, done, {}
-
-    def reset(self):
-        self.state = np.random.rand(10)
-        self.generation = 0
-        return np.array(self.state)
-
-    def render(self, mode='human'):
-        print(f"Generation: {self.generation}, State: {self.state}")
-"""
-
 class Dragodinde:
     def __init__(self, id : int, sex: str, couleur: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
         self.id = id
@@ -74,7 +24,7 @@ class Dragodinde:
         return self.generation
     
     def get_arbre_genealogique(self):
-        return self.arbre_genealogique.get_node()
+        return self.arbre_genealogique
     
     def get_nombre_reproductions(self) :
         return self.nombre_reproductions
@@ -190,78 +140,52 @@ class Elevage:
     def check_couleur(self, couleur_A:str, couleur_B:str) -> bool :
         return True if " et " not in couleur_A and " et " not in couleur_B else False
     
-    def croisement_mono_mono(self, couleur_A: str, couleur_B: str):
+    def croisement_mono_mono(self, couleur_A: str, weight_A : float, couleur_B: str, weight_B : float):
         """
         Croisement : mono couleur (A) X mono couleur (B) :
         (45% couleur (A))(45% couleur (B))(10% bicolor (A/B))
         """
         proba = defaultdict(float)
         if couleur_A != couleur_B :
-            proba[couleur_A] = 0.45
-            proba[couleur_B] = 0.45
-            proba[f"{couleur_A} et {couleur_B}"] = 0.10
+            proba[couleur_A] = round(0.45 * weight_A * weight_B, 4)
+            proba[couleur_B] = round(0.45  * weight_A * weight_B, 4)
+            proba[f"{couleur_A} et {couleur_B}"] = round(0.10 * weight_A * weight_B, 4)
 
         else :
-            proba[couleur_A] = 1.0
+            proba[couleur_A] = round(1.0 * weight_A * weight_B, 4)
         return proba
 
-    def croisement_monobi_bibi(self, couleur_A: str, couleur_B: str):
+    def croisement_monobi_bibi(self, couleur_A: str, weight_A : float, couleur_B: str, weight_B : float):
         """
         Croisement : bi/mono couleur (A) X bi couleur (B):
         (50% bi/monocolor (A))(50% bi (B))
         """
         proba = defaultdict(float)
+
+        # Special case where both bicolor dd can try the get a mono color baby
         if couleur_A in self.special_cases and couleur_B in self.special_cases :
-            #Special case where both bicolor dd can try the get a mono color baby
             set1 = set(self.special_cases[couleur_A])
             set2 = set(self.special_cases[couleur_B])
             intersection = set1 & set2
             if intersection :
-                proba[intersection.pop()] += 0.10
-                proba[couleur_A] += 0.45
-                proba[couleur_B] += 0.45
-        else:
-            #Case momo/bi or bi/bi not special case
-            proba[couleur_A] += 0.50
-            proba[couleur_B] += 0.50
-
-        return proba
-
-    def combiner_probabilites(self, proba1:float, proba2:float, poids1:float, poids2:float):
-        """
-        Combine les probabilités de deux dictionnaires en utilisant des poids donnés.
-        """
-        result = defaultdict(float)
-        for couleur, p in proba1.items():
-            result[couleur] += p * poids1
-        for couleur, p in proba2.items():
-            result[couleur] += p * poids2
-        return result   
+                proba[intersection.pop()] += round(0.10 * weight_A * weight_B, 4)
+                proba[couleur_A] += round(0.45 * weight_A * weight_B, 4)
+                proba[couleur_B] += round(0.45 * weight_A * weight_B, 4)
         
-    def croisement_parents(self, dinde1: Dragodinde, dinde2: Dragodinde, niveau: int, poids: float):
-        """
-        Fonction auxiliaire pour gérer le croisement à un certain niveau généalogique.
-        """
-        proba = defaultdict(float)
-        if dinde1.get_arbre_genealogique() and dinde2.get_arbre_genealogique():
-            list_couleur_dinde1 = dinde1.get_arbre_genealogique()[niveau]
-            list_couleur_dinde2 = dinde2.get_arbre_genealogique()[niveau]
-            
-            for couleur1, couleur2 in zip(list_couleur_dinde1, list_couleur_dinde2):
-                if couleur1 and couleur2:
-                    if self.check_couleur(couleur1, couleur2):
-                        proba = self.combiner_probabilites(proba, self.croisement_mono_mono(couleur1, couleur2), 1.0, poids)
-                    else:
-                        proba = self.combiner_probabilites(proba, self.croisement_monobi_bibi(couleur1, couleur2), 1.0, poids)
+        # Case momo/bi or bi/bi not special case
+        else:
+            proba[couleur_A] += round(0.50 * weight_A * weight_B, 4)
+            proba[couleur_B] += round(0.50 * weight_A * weight_B, 4)
+
         return proba
-    
+        
     def croisement(self, dinde_m: Dragodinde, dinde_f: Dragodinde) -> dict :
         
         node_list_dinde_m = dinde_m.get_arbre_genealogique().get_all_nodes()
         node_list_dinde_f = dinde_f.get_arbre_genealogique().get_all_nodes()
         dic_dinde_m = dict()
         dic_dinde_f = dict()
-        color_prob = dict()
+        color_prob = defaultdict(float)
 
         for node_m, node_f in zip(node_list_dinde_m, node_list_dinde_f) : 
             dic_dinde_m[node_m.get_color()] += node_m.get_weight()
@@ -270,25 +194,26 @@ class Elevage:
         # Do crossing
         for color_m, weight_m in dic_dinde_m.items() :
             for color_f, weight_f in dic_dinde_f.items() :
-                male = [color_m, weight_m]
-                femelle = [color_f, weight_f]
-                color_prob = self.croisement_parents(male, femelle)
-        
+                if self.check_couleur(color_m, color_f):
+                    print(color_prob)
+                    color_prob = self.croisement_mono_mono(color_m, weight_m, color_f, weight_f)
+                else:
+                    print(color_prob)
+                    color_prob = self.croisement_monobi_bibi(color_m, weight_m, color_f, weight_f)
+            
         return color_prob
 
     def choice_color(self, probabilities) :
         # Liste des événements et des poids correspondants
-        events = list(probabilities.keys())
-        weights = list(probabilities.values())
-        selected_event = random.choices(events, weights=weights, k=1)[0]
-        return selected_event
+        list_color = list(probabilities.keys())
+        list_proba = list(probabilities.values())
+        print(list_color)
+        print(list_proba)
+        selected_color = random.choices(list_color, weights=list_proba, k=1)[0]
+        return selected_color
     
     def get_generation(self, color: str) -> int:
         return self.generations.get_generation_by_color(color)
-
-    def check_proba(self, dict_proba:dict) :
-        if sum(dict_proba.values()) != 1.0 :
-            raise ValueError("Error : The sum of dict_prob isn't equal to 1")
 
     def accouplement_naissance(self, male: Dragodinde, female: Dragodinde):
         if male is None or female is None:
@@ -301,16 +226,17 @@ class Elevage:
         female.add_reproduction()
         nouvel_id = len(self.dragodindes) + 1
 
-        parent_m = male.get_arbre_genealogique()
-        parent_f = female.get_arbre_genealogique()
+        print("test 1m : ", male)
+        print("test 1f : ", female)
 
         sexe = random.choice(['M', 'F'])
         dic_probability = self.croisement(male, female)
-        self.check_proba(dic_probability)
         couleur = self.choice_color(dic_probability)
         generation = self.get_generation(couleur)
 
-        new_ind = Node(couleur, 0.5, parent_m, parent_f)
+        node_parent_m = male.get_arbre_genealogique().get_node()
+        node_parent_f = female.get_arbre_genealogique().get_node()
+        new_ind = Node(couleur, 0.5, node_parent_m, node_parent_f)
         nouvel_arbre_genealogique = Genealogie(new_ind)
 
         nouvelle_dd = Dragodinde(nouvel_id, sexe, couleur, generation, nouvel_arbre_genealogique)
@@ -344,6 +270,12 @@ class Node:
 
     def get_weight(self):
         return self.weight
+    
+    def __str__(self):
+        return (f"color: {self.color}\n"
+                f"weight: {self.weight}\n"
+                f"ancestor_m: {self.ancestor_m}\n"
+                f"ancestor_f: {self.ancestor_f}\n")
 
 class Genealogie:
     def __init__(self, root_node=None):
@@ -404,7 +336,3 @@ class Genealogie:
                 f"grand parents: {self.get_genealogie(2)}\n"
                 f"great-grand parents: {self.get_genealogie(3)}")
     
-# class Genealogie:
-
-#     def get_parents_and_grandparents(self) :
-#         return [self.get_str_p(self.parents), self.get_str_p(self.grandparents), self.get_str_p(self.great_grandparents)]

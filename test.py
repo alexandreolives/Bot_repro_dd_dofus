@@ -31,12 +31,47 @@ class TestGenealogie(unittest.TestCase):
 
     def test_init_weight(self):
         self.genealogy.update_weights_and_colors()
-
-        print(self.genealogy.__str__())
         all_nodes = self.genealogy.get_all_nodes()
         initiated_nodes = [node.get_weight() for node in all_nodes]
         expected_weights = [0.5, 0.125, 0.0375, 0.0125, 0.0125, 0.0375, 0.0125, 0.0125, 0.125, 0.0375, 0.0125, 0.0125, 0.0375, 0.0125, 0.0125]
         self.assertEqual(initiated_nodes, expected_weights)
+
+class TestCrosing(unittest.TestCase):
+
+    def setUp(self) :
+
+        self.gp1 = dd_class.Node("Ebène")
+        self.gp2 = dd_class.Node("Amande")
+        self.p1 = dd_class.Node("Amande", 0.5, self.gp1, self.gp2)
+        self.dd_1 = dd_class.Dragodinde(1, "M", "Amande", 1, dd_class.Genealogie(self.p1))
+
+        self.gp3 = dd_class.Node("Indigo")
+        self.gp4 = dd_class.Node("Rousse")
+        self.p2 = dd_class.Node("Rousse", 0.5, self.gp3, self.gp4)
+        self.dd_2 = dd_class.Dragodinde(2, "F", "Rousse", 1, dd_class.Genealogie(self.p2))
+        
+        self.elevage = dd_class.Elevage([self.dd_1, self.dd_2])
+
+    def test_crosing(self):
+        _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(2))
+        expected_probability = {
+                "Rousse": 37,
+                "Amande": 37,
+                "Indigo": 8,
+                "Ebène": 8,
+                "Amande et Rousse": 6,
+                "Amande et Indigo": 1,
+                "Ebène et Rousse": 1,
+                "Indigo et Ebène": 0
+            }
+
+        # Convert probabilities to percentages if needed
+        dic_probability = {k: v * 100 for k, v in dic_probability.items()}
+
+        #Ensure the keys are properly formatted to match expected keys
+        formatted_dic_probability = {k.split(' ')[-1]: v for k, v in dic_probability.items()}
+
+        self.assertEqual(formatted_dic_probability, expected_probability)
 
 if __name__ == "__main__":
     unittest.main()

@@ -3,6 +3,51 @@ import random
 import numpy as np
 from tensorflow.keras import layers
 from collections import deque
+from gym import spaces
+
+class Environnement(gym.Env):
+    def __init__(self):
+        super(Environnement, self).__init__()
+        self.action_space = spaces.Discrete(2)  # Exemple: 2 actions possibles (accouplement A ou B)
+        self.observation_space = spaces.Box(low=0, high=1, shape=(10,), dtype=np.float32)  # Exemple: état de 10 dimensions
+        self.state = self.reset()
+        self.generation = 0
+        self.max_generations = 10
+
+    def get_generation(self) :
+        return self.generation
+
+    def set_generation(self, actual_generation) :
+        self.generation = actual_generation
+    
+    def step(self, action):
+        assert self.action_space.contains(action)
+        reward = 0
+        done = False
+
+        # Simulez le croisement ici, mettez à jour self.state et reward
+        if action > self.generation:
+            reward = 1000
+            self.generation += 1
+
+        elif action == self.generation:
+            reward = 1
+
+        elif action < self.generation-2 :
+            reward = -1000
+
+        if self.generation == self.max_generations:
+            done = True
+
+        return np.array(self.state), reward, done, {}
+
+    def reset(self):
+        self.state = np.random.rand(10)
+        self.generation = 0
+        return np.array(self.state)
+
+    def render(self):
+        print(f"Generation: {self.generation}, State: {self.state}")
 
 class DQNAgent:
     def __init__(self, state_size, action_size):
