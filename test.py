@@ -98,6 +98,12 @@ class TestCrosing(unittest.TestCase):
 
         self.elevage = dd_class.Elevage([self.dd_1, self.dd_2, self.dd_3, self.dd_4])
 
+    def uni_test_bad_crosing(self):
+        with self.assertRaises(ValueError) as context:
+            self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(3))
+
+        self.assertEqual(str(context.exception), "Cannot breed dragodindes of the same sex.")
+
     def test_crosing_mono_mono(self):
         _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(2))
         expected_probability = {
