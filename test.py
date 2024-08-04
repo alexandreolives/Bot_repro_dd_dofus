@@ -111,10 +111,9 @@ class TestCrosing(unittest.TestCase):
                 "Indigo et Ebène": 0.63
             }
 
-        print("dic_probability : ", dic_probability)
         dic_probability = {k: v * 100 for k, v in dic_probability.items()}
 
-        print("formatted_dic_probability : ", dic_probability)
+        print("formatted_dic_probability : ", dic_probability, '\n')
         self.assertEqual(dic_probability, expected_probability)
     
     def test_crosing_mono_bi(self):
@@ -123,7 +122,7 @@ class TestCrosing(unittest.TestCase):
                 "test" : 1
             }
 
-        print("dic_probability : ", dic_probability)
+        print("dic_probability mono-bi : ", dic_probability, '\n')
 
         dic_probability = {k: v * 100 for k, v in dic_probability.items()}
         self.assertEqual(dic_probability, expected_probability)
@@ -134,7 +133,7 @@ class TestCrosing(unittest.TestCase):
                 "test" : 1
             }
         
-        print("dic_probability : ", dic_probability)
+        print("dic_probability : ", dic_probability, '\n')
 
         dic_probability = {k: v * 100 for k, v in dic_probability.items()}
         self.assertEqual(dic_probability, expected_probability)

@@ -212,7 +212,7 @@ class Elevage:
         color_prob[couleur_B] = color_prob.get(couleur_B, 0) + 0.50 * weight_A * weight_B
 
         return color_prob
-        
+
     def croisement(self, dinde_m: Dragodinde, dinde_f: Dragodinde) -> dict :
         
         node_list_dinde_m = dinde_m.get_arbre_genealogique().get_all_nodes()
@@ -225,8 +225,8 @@ class Elevage:
             color_m, weight_m = node_m.get_color(), node_m.get_weight()
             color_f, weight_f = node_f.get_color(), node_f.get_weight()
 
-            dic_dinde_m[color_m] = dic_dinde_m.get(color_m, 0) + weight_m
-            dic_dinde_f[color_f] = dic_dinde_f.get(color_f, 0) + weight_f
+            dic_dinde_m[color_m] = dic_dinde_m.get(color_m, 0) + (weight_m / 42)
+            dic_dinde_f[color_f] = dic_dinde_f.get(color_f, 0) + (weight_f / 42)
 
         # Do crossing
         for color_m, weight_m in dic_dinde_m.items() :
@@ -337,7 +337,7 @@ class Genealogie:
             self.init_weight(parent, current_level + 1, dic_weight_level)
 
     def update_weights_and_colors(self):
-        dic_weight_level = {0: 0.5, 1: 0.125, 2: 0.0375, 3: 0.0125}
+        dic_weight_level = {0: 10, 1: 6, 2: 3, 3: 1} # weight
         self.init_weight(self.root_node, 0, dic_weight_level)
 
     def get_ancestors_at_level(self, node, current_level, level):
