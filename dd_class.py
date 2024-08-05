@@ -7,7 +7,7 @@ class Dragodinde:
         self.sex = sex
         self.couleur = couleur
         self.generation = generation
-        self.arbre_genealogique = arbre_genealogique if arbre_genealogique is not None else Genealogie()
+        self.arbre_genealogique = arbre_genealogique if arbre_genealogique is not None else Genealogie(Node(couleur, 10)).update_weights_and_colors()
         self.nombre_reproductions = nombre_reproductions
 
     def get_id(self):
@@ -40,13 +40,17 @@ class Dragodinde:
                 f"Nombre de reproductions: {self.nombre_reproductions}\n")
 
 class Generation:
-    def __init__(self, number_generation: int, monocolor: bool, colors: list):
+    def __init__(self, number_generation: int, apprendissage:float, monocolor: bool, colors: list):
         self.number_generation = number_generation
+        self.apprendissage = apprendissage
         self.monocolor = monocolor
         self.colors = colors
 
     def get_number_generation(self):
         return self.number_generation
+    
+    def get_apprendissage(self):
+        return self.apprendissage
 
     def get_monocolor(self):
         return self.monocolor
@@ -65,39 +69,46 @@ class Generations:
         for generation in self.generations:
             if color in generation.get_colors():
                 return generation.get_number_generation()
-        return None
+        raise ValueError("Color not find in the generations object")
+    
+    def get_apprentissage_by_color(self, color:str) -> float :
+        for generation in self.generations:
+            if color in generation.get_colors():
+                return generation.get_apprendissage()
+        raise ValueError("Color not find in the generations object")
     
     def initialize_generations(self):
 
         generations_data = [
-            (1, True, ["Rousse", "Amande", "Dorée"]),
-            (2, False, ["Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"]),
-            (3, True, ["Indigo", "Ebène"]),
+            (1, True, ["Rousse", "Amande", "Dorée"], 0.2),
+            (2, False, ["Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"], 0.25),
+            (3, True, ["Indigo", "Ebène"], 0.25),
             (4, False, ["Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène", 
-                        "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"]),
-            (5, True, ["Pourpre", "Orchidée"]),
+                        "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"], 0.25),
+            (5, True, ["Pourpre", "Orchidée"], 0.33),
             (6, False, ["Pourpre et Rousse", "Orchidée et Rousse", "Amande et Pourpre", "Amande et Orchidée", 
                         "Dorée et Pourpre", "Dorée et Orchidée", "Indigo et Pourpre", "Indigo et Orchidée", 
-                        "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"]),
-            (7, True, ["Ivoire", "Turquoise"]),
+                        "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"], 0.33),
+            (7, True, ["Ivoire", "Turquoise"], 0.33),
             (8, False, ["Ivoire et Rousse", "Turquoise et Rousse", "Amande et Ivoire", "Amande et Turquoise", 
                         "Dorée et Ivoire", "Dorée et Turquoise", "Indigo et Ivoire", "Indigo et Turquoise", 
                         "Ebène et Ivoire", "Ebène et Turquoise", "Pourpre et Ivoire", "Turquoise et Pourpre", 
-                        "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"]),
-            (9, True, ["Emeraude", "Prune"]),
+                        "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"], 0.5),
+            (9, True, ["Emeraude", "Prune"], 0.5),
             (10, False, ["Rousse et Emeraude", "Rousse et Prune", "Amande et Emeraude", "Amande et Prune", 
                          "Dorée et Emeraude", "Dorée et Prune", "Indigo et Emeraude", "Indigo et Prune", 
                          "Ebène et Emeraude", "Ebène et Prune", "Pourpre et Emeraude", "Pourpre et Prune", 
                          "Orchidée et Emeraude", "Orchidée et Prune", "Ivoire et Emeraude", "Ivoire et Prune", 
-                         "Turquoise et Emeraude", "Turquoise et Prune"])
+                         "Turquoise et Emeraude", "Turquoise et Prune"], 1.0)
         ]
         generations = []
 
-        for number, monocolor, colors in generations_data:
-            generation = Generation(number, monocolor, colors)
+        for number, monocolor, colors, apprentissage in generations_data:
+            generation = Generation(number, apprentissage, monocolor, colors)
             generations.append(generation)
 
         return generations
+    
 class Elevage:  
 
     def __init__(self, dragodindes : list) :
@@ -116,7 +127,7 @@ class Elevage:
             "Pourpre et Ivoire": ["Emeraude"]
         }
 
-        self.list_bicolor_dd = self.list_bicolor_dd = [
+        self.list_bicolor_dd = [
             "Rousse et Amande", "Rousse et Dorée", "Amande et Dorée",
             "Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène",
             "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène",
@@ -156,14 +167,27 @@ class Elevage:
     def check_couleur(self, couleur_A:str, couleur_B:str) -> bool :
         return True if " et " not in couleur_A and " et " not in couleur_B else False
     
+    def calcul_PGC(self, apprentissage_value:float, generation:int) -> float :
+        return (100*apprentissage_value)/(2-(generation%2))
+    
+    def calcul_prob_color(self, PGC_c1, PGC_c2) -> float :
+        return PGC_c1 / (PGC_c1 + PGC_c2)
+    
     def croisement_mono_mono(self, couleur_A: str, weight_A : float, couleur_B: str, weight_B : float, color_prob : defaultdict):
         """
         Croisement : mono couleur (A) X mono couleur (B) :
         (45% couleur (A))(45% couleur (B))(10% bicolor (A/B))
         """
         if couleur_A != couleur_B :
-            color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 0.45 * weight_A * weight_B
-            color_prob[couleur_B] = color_prob.get(couleur_B, 0) + 0.45 * weight_A * weight_B
+
+            pgc_a = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_A), self.generations.get_generation_by_color(couleur_A))
+            pgc_b = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_B), self.generations.get_generation_by_color(couleur_B))
+            Proba_a = self.calcul_prob_color(pgc_a, pgc_b)
+            Proba_b = self.calcul_prob_color(pgc_b, pgc_a)
+            color_prob[couleur_A] = color_prob.get(couleur_A, 0) + Proba_a * weight_A * weight_B
+            color_prob[couleur_B] = color_prob.get(couleur_B, 0) + Proba_b * weight_A * weight_B
+            # color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 0.45 * weight_A * weight_B
+            # color_prob[couleur_B] = color_prob.get(couleur_B, 0) + 0.45 * weight_A * weight_B
             
             # Construct the bicolor key
             bicolor_key_1 = f"{couleur_A} et {couleur_B}"
@@ -189,20 +213,11 @@ class Elevage:
         # Special case where both bicolor dd can try the get a mono color baby
         if couleur_A in self.special_cases and couleur_B in self.special_cases :
 
-            print("couleur_A : ", couleur_A)
-            print("couleur_B : ", couleur_B)
-
             set1 = set(self.special_cases[couleur_A])
             set2 = set(self.special_cases[couleur_B])
-
-            print("set1 : ", set1)
-            print("set2 : ", set2)
-
             intersection = set1 & set2
-            print("intersection : ", intersection)
 
             if intersection :
-                print("intersection : ", next(iter(intersection)))
                 color_prob[next(iter(intersection))] = color_prob.get(next(iter(intersection)), 0) + 0.10 * weight_A * weight_B
                 color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 0.45 * weight_A * weight_B
                 color_prob[couleur_B] = color_prob.get(couleur_B, 0) + 0.45 * weight_A * weight_B
@@ -215,6 +230,7 @@ class Elevage:
 
     def croisement(self, dinde_m: Dragodinde, dinde_f: Dragodinde) -> dict :
         
+        print("dinde_m : ", dinde_m)
         node_list_dinde_m = dinde_m.get_arbre_genealogique().get_all_nodes()
         node_list_dinde_f = dinde_f.get_arbre_genealogique().get_all_nodes()
         dic_dinde_m = dict()
@@ -235,16 +251,17 @@ class Elevage:
                     color_prob = self.croisement_mono_mono(color_m, weight_m, color_f, weight_f, color_prob)
                 else:
                     color_prob = self.croisement_monobi_bibi(color_m, weight_m, color_f, weight_f, color_prob)
-                
+        
+        if not color_prob:
+            raise ValueError("Probability color dictionary is empty")
+        
         return color_prob
 
     def choice_color(self, probabilities) :
-        # Liste des événements et des poids correspondants
         list_color = list(probabilities.keys())
         list_proba = list(probabilities.values())
-        print(list_color)
-        print(list_proba)
         selected_color = random.choices(list_color, weights=list_proba, k=1)[0]
+        
         return selected_color
     
     def get_generation(self, color: str) -> int:
@@ -260,23 +277,23 @@ class Elevage:
         if male.get_sex() == female.get_sex():
             raise ValueError("Cannot breed dragodindes of the same sex.")
 
+        # Calcul the color probablity dictionnary
         male.add_reproduction()
         female.add_reproduction()
         nouvel_id = len(self.dragodindes) + 1
-
         sexe = random.choice(['M', 'F'])
         dic_probability = self.round_dict_values(self.croisement(male, female))
-       
         couleur = self.choice_color(dic_probability)
+        
+        # Create an new dd
         generation = self.get_generation(couleur)
-
         node_parent_m = male.get_arbre_genealogique().get_node()
         node_parent_f = female.get_arbre_genealogique().get_node()
         new_ind = Node(couleur, 0.5, node_parent_m, node_parent_f)
         nouvel_arbre_genealogique = Genealogie(new_ind)
-
         nouvelle_dd = Dragodinde(nouvel_id, sexe, couleur, generation, nouvel_arbre_genealogique)
         self.naissance(nouvelle_dd)
+
         self.check_mort(male)
         self.check_mort(female)
 
@@ -314,7 +331,7 @@ class Node:
                 f"ancestor_f: {self.ancestor_f}\n")
 
 class Genealogie:
-    def __init__(self, root_node=None):
+    def __init__(self, root_node:Node):
         self.root_node = root_node
 
     def get_node(self) :
