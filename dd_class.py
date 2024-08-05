@@ -230,6 +230,7 @@ class Elevage:
 
     def croisement(self, dinde_m: Dragodinde, dinde_f: Dragodinde) -> dict :
         
+        print("dinde_m : ", dinde_m)
         node_list_dinde_m = dinde_m.get_arbre_genealogique().get_all_nodes()
         node_list_dinde_f = dinde_f.get_arbre_genealogique().get_all_nodes()
         dic_dinde_m = dict()
@@ -292,7 +293,7 @@ class Elevage:
         nouvel_arbre_genealogique = Genealogie(new_ind)
         nouvelle_dd = Dragodinde(nouvel_id, sexe, couleur, generation, nouvel_arbre_genealogique)
         self.naissance(nouvelle_dd)
-        
+
         self.check_mort(male)
         self.check_mort(female)
 
