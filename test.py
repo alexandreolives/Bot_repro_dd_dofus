@@ -33,7 +33,7 @@ class TestGenealogie(unittest.TestCase):
         self.genealogy.update_weights_and_colors()
         all_nodes = self.genealogy.get_all_nodes()
         initiated_nodes = [node.get_weight() for node in all_nodes]
-        expected_weights = [0.5, 0.125, 0.0375, 0.0125, 0.0125, 0.0375, 0.0125, 0.0125, 0.125, 0.0375, 0.0125, 0.0125, 0.0375, 0.0125, 0.0125]
+        expected_weights = [10, 6, 3, 1, 1, 3, 1, 1, 6, 3, 1, 1, 3, 1, 1]
         self.assertEqual(initiated_nodes, expected_weights)
 
 class TestCrosing(unittest.TestCase):
@@ -119,7 +119,7 @@ class TestCrosing(unittest.TestCase):
 
         dic_probability = {k: v * 100 for k, v in dic_probability.items()}
 
-        print("formatted_dic_probability : ", dic_probability, '\n')
+        print("dic_probability mono-mono: ", dic_probability, '\n')
         self.assertEqual(dic_probability, expected_probability)
     
     def test_crosing_mono_bi(self):
@@ -139,7 +139,7 @@ class TestCrosing(unittest.TestCase):
                 "test" : 1
             }
         
-        print("dic_probability : ", dic_probability, '\n')
+        print("dic_probability bi-bi : ", dic_probability, '\n')
 
         dic_probability = {k: v * 100 for k, v in dic_probability.items()}
         self.assertEqual(dic_probability, expected_probability)
