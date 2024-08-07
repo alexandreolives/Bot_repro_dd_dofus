@@ -87,26 +87,26 @@ class Generations:
     def initialize_generations(self):
 
         generations_data = [
-            (1, True, ["Rousse", "Amande", "Dorée"], 0.2),
-            (2, False, ["Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"], 0.25),
-            (3, True, ["Indigo", "Ebène"], 0.25),
+            (1, True, ["Rousse", "Amande", "Dorée"], 1.0),
+            (2, False, ["Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"], 0.8),
+            (3, True, ["Indigo", "Ebène"], 0.8),
             (4, False, ["Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène", 
-                        "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"], 0.25),
-            (5, True, ["Pourpre", "Orchidée"], 0.33),
+                        "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"], 0.8),
+            (5, True, ["Pourpre", "Orchidée"], 0.7),
             (6, False, ["Pourpre et Rousse", "Orchidée et Rousse", "Amande et Pourpre", "Amande et Orchidée", 
                         "Dorée et Pourpre", "Dorée et Orchidée", "Indigo et Pourpre", "Indigo et Orchidée", 
-                        "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"], 0.33),
-            (7, True, ["Ivoire", "Turquoise"], 0.33),
+                        "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"], 0.6),
+            (7, True, ["Ivoire", "Turquoise"], 0.5),
             (8, False, ["Ivoire et Rousse", "Turquoise et Rousse", "Amande et Ivoire", "Amande et Turquoise", 
                         "Dorée et Ivoire", "Dorée et Turquoise", "Indigo et Ivoire", "Indigo et Turquoise", 
                         "Ebène et Ivoire", "Ebène et Turquoise", "Pourpre et Ivoire", "Turquoise et Pourpre", 
-                        "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"], 0.5),
-            (9, True, ["Emeraude", "Prune"], 0.5),
+                        "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"], 0.4),
+            (9, True, ["Emeraude", "Prune"], 0.3),
             (10, False, ["Rousse et Emeraude", "Rousse et Prune", "Amande et Emeraude", "Amande et Prune", 
                          "Dorée et Emeraude", "Dorée et Prune", "Indigo et Emeraude", "Indigo et Prune", 
                          "Ebène et Emeraude", "Ebène et Prune", "Pourpre et Emeraude", "Pourpre et Prune", 
                          "Orchidée et Emeraude", "Orchidée et Prune", "Ivoire et Emeraude", "Ivoire et Prune", 
-                         "Turquoise et Emeraude", "Turquoise et Prune"], 1.0)
+                         "Turquoise et Emeraude", "Turquoise et Prune"], 0.2)
         ]
         generations = []
 
@@ -143,7 +143,7 @@ class Elevage:
         for dragodinde in self.dragodindes:
             if dragodinde.get_id() == id :
                 return dragodinde
-        return None 
+        raise ValueError(f"ID = {id}, not find in the elevage")
     
     def add_DD(self, dragodinde:Dragodinde) :
         self.dragodindes.append(dragodinde)
@@ -155,28 +155,59 @@ class Elevage:
     def naissance(self, dragodinde:Dragodinde) :
         self.dragodindes.append(dragodinde)
 
+    def has_common_element(self, list1, list2):
+        return any(element in list2 for element in list1)
+    
     def check_compatibility(self, color_A:str, color_B:str) -> bool :
         # True case : mono-mono / bi-bi with special case
         # bi-bi with special case
-        if " et " in color_A and " et " in color_B :
-            bicolor_key_1 = f"{color_A} et {color_B}"
-            bicolor_key_2 = f"{color_B} et {color_A}"
-            if bicolor_key_1 in self.list_bicolor_dd or bicolor_key_2 in self.list_bicolor_dd :
+        if " et " in color_A and " et " in color_B and (color_A in self.special_cases.values() and color_B in self.special_cases.values()):
+            if self.has_common_element(self.special_cases[color_A], self.special_cases[color_B]) :
                 return True
             
-        #  mono-mono
+        # mono-mono
         elif " et " not in color_A and " et " not in color_B :
             return True
         
         # False case : mono-bi / bi-mono / bi-bi with no special case 
         return False
+
+    def identify_new_color(self, color_A:str, color_B:str) -> str :
+        # Case bi-bi
+        if " et " in color_A and " et " in color_B :
+            return list(set(self.special_cases[color_A]) & set(self.special_cases[color_B]))[0]
+            
+        # Case mono-mono
+        elif " et " not in color_A and " et " not in color_B :
+            
+            # Construct the bicolor key
+            bicolor_key_1 = f"{color_A} et {color_B}"
+            bicolor_key_2 = f"{color_B} et {color_A}"
+
+            # Check if the bicolor combination is in the list
+            if bicolor_key_1 in self.list_bicolor_dd:
+                return bicolor_key_1
+            elif bicolor_key_2 in self.list_bicolor_dd:
+                return bicolor_key_2
+            else :
+                raise ValueError(f"The combinaison of {color_A} and {color_B} didn't match any kind of bicolored dd")
+ 
+        else :
+            raise ValueError(f"{color_A} and {color_B} are not suppose to combine here")
+
     
     def calcul_PGC(self, apprentissage_value:float, generation:int) -> float :
         return (100*apprentissage_value)/(2-(generation%2))
     
-    def calcul_prob_color(self, PGC_c1, PGC_c2) -> float :
+    def calcul_prob_color_imcomp(self, PGC_c1, PGC_c2) -> float :
         return PGC_c1 / (PGC_c1 + PGC_c2)
-    
+
+    def calcul_prob_color_comp(self, PGC_c1, PGC_c2, PGC_c3) -> float :
+        return PGC_c1 / (PGC_c1 + PGC_c2 + 0.5 * PGC_c3)
+
+    def calcul_prob_color_new(self, PGC_c1, PGC_c2, PGC_c3) -> float :
+        return (0.5 * PGC_c3) / (PGC_c1 + PGC_c2 + 0.5 * PGC_c3)
+     
     def crossing_incompatible(self, couleur_A: str, weight_A : float, couleur_B: str, weight_B : float, color_prob : defaultdict):
         """
         Crossing where 2 dd can't create a third one
@@ -185,8 +216,8 @@ class Elevage:
 
             pgc_a = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_A), self.generations.get_generation_by_color(couleur_A))
             pgc_b = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_B), self.generations.get_generation_by_color(couleur_B))
-            Proba_a = self.calcul_prob_color(pgc_a, pgc_b)
-            Proba_b = self.calcul_prob_color(pgc_b, pgc_a)
+            Proba_a = self.calcul_prob_color_imcomp(pgc_a, pgc_b)
+            Proba_b = self.calcul_prob_color_imcomp(pgc_b, pgc_a)
             color_prob[couleur_A] = color_prob.get(couleur_A, 0) + Proba_a * weight_A * weight_B
             color_prob[couleur_B] = color_prob.get(couleur_B, 0) + Proba_b * weight_A * weight_B
     
@@ -199,18 +230,20 @@ class Elevage:
         """
         Crossing where 2 dd can create a third one
         """
-        # Construct the bicolor key
-        bicolor_key_1 = f"{couleur_A} et {couleur_B}"
-        bicolor_key_2 = f"{couleur_B} et {couleur_A}"
+        couleur_C = self.identify_new_color(couleur_A, couleur_B)
 
-        # Check if the bicolor combination is in the list
-        if bicolor_key_1 in self.list_bicolor_dd:
-            color_prob[bicolor_key_1] = color_prob.get(bicolor_key_1, 0) + 0.10 * weight_A * weight_B
-        elif bicolor_key_2 in self.list_bicolor_dd:
-            color_prob[bicolor_key_2] = color_prob.get(bicolor_key_2, 0) + 0.10 * weight_A * weight_B
-        else :
-            raise ValueError(f"The combinaison of {couleur_A} and {couleur_B} didn't match any kind of bicolored dd")
-        
+        pgc_a = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_A), self.generations.get_generation_by_color(couleur_A))
+        pgc_b = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_B), self.generations.get_generation_by_color(couleur_B))
+        pgc_c = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_C), self.generations.get_generation_by_color(couleur_C))
+
+        Proba_a = self.calcul_prob_color_comp(pgc_a, pgc_b, pgc_c)
+        Proba_b = self.calcul_prob_color_comp(pgc_b, pgc_a, pgc_c)
+        Proba_c = self.calcul_prob_color_new(pgc_a, pgc_b, pgc_c)
+
+        color_prob[couleur_A] = color_prob.get(couleur_A, 0) + Proba_a * weight_A * weight_B
+        color_prob[couleur_B] = color_prob.get(couleur_B, 0) + Proba_b * weight_A * weight_B
+        color_prob[couleur_C] = color_prob.get(couleur_C, 0) + Proba_c * weight_A * weight_B
+
         return color_prob
 
     def crossing(self, dinde_m: Dragodinde, dinde_f: Dragodinde) -> dict :
@@ -221,14 +254,15 @@ class Elevage:
         dic_dinde_f = dict()
         color_prob = defaultdict(float)
 
+        # Create 2 color dict from both genealogic tree 
         for node_m, node_f in zip(node_list_dinde_m, node_list_dinde_f) :
             color_m, weight_m = node_m.get_color(), node_m.get_weight()
             color_f, weight_f = node_f.get_color(), node_f.get_weight()
 
-            dic_dinde_m[color_m] = dic_dinde_m.get(color_m, 0) + (weight_m / 42)
-            dic_dinde_f[color_f] = dic_dinde_f.get(color_f, 0) + (weight_f / 42)
+            dic_dinde_m[color_m] = dic_dinde_m.get(color_m, 0) + weight_m 
+            dic_dinde_f[color_f] = dic_dinde_f.get(color_f, 0) + weight_f
 
-        # Do crossing
+        # Crossing both dic 
         for color_m, weight_m in dic_dinde_m.items() :
             for color_f, weight_f in dic_dinde_f.items() :
                 if self.check_compatibility(color_m, color_f):
@@ -252,7 +286,7 @@ class Elevage:
         return self.generations.get_generation_by_color(color)
 
     def round_dict_values(self, input_dict):
-        return {key: round(value, 4) for key, value in input_dict.items()}
+        return {key: round(value*100, 2) for key, value in input_dict.items()}
 
     def accouplement_naissance(self, male: Dragodinde, female: Dragodinde):
         if male is None or female is None:
@@ -340,7 +374,7 @@ class Genealogie:
             self.init_weight(parent, current_level + 1, dic_weight_level)
 
     def update_weights_and_colors(self) :
-        dic_weight_level = {0: 10, 1: 6, 2: 3, 3: 1} # weight
+        dic_weight_level = {0: 10/42, 1: 6/42, 2: 3/42, 3: 1/42} # weight
         dump = Node(None, None, self.root_node)
         self.init_weight(self.root_node, 0, dic_weight_level)
         return Genealogie(dump.get_ancestor_m())

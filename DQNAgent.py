@@ -8,7 +8,7 @@ from gym import spaces
 class Environnement(gym.Env):
     def __init__(self):
         super(Environnement, self).__init__()
-        self.action_space = spaces.Discrete(2)  # Exemple: 2 actions possibles (accouplement A ou B)
+        self.action_space = spaces.Discrete(2)
         self.observation_space = spaces.Box(low=0, high=1, shape=(10,), dtype=np.float32)  # Exemple: état de 10 dimensions
         self.state = self.reset()
         self.generation = 0
