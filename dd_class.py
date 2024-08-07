@@ -168,7 +168,7 @@ class Elevage:
         elif " et " not in color_A and " et " not in color_B :
             return True
         
-        # False case : mono-bi / bi-mono / bi-bi with no specila case 
+        # False case : mono-bi / bi-mono / bi-bi with no special case 
         return False
     
     def calcul_PGC(self, apprentissage_value:float, generation:int) -> float :
@@ -360,11 +360,11 @@ class Genealogie:
         return self.get_ancestors_at_level(self.root_node, 0, level)
 
     def traverse_genealogy(self, node, nodes_list):
-            if node is None:
-                return
-            nodes_list.append(node)
-            self.traverse_genealogy(node.get_ancestor_m(), nodes_list)
-            self.traverse_genealogy(node.get_ancestor_f(), nodes_list)
+        if node is None:
+            return
+        nodes_list.append(node)
+        self.traverse_genealogy(node.get_ancestor_m(), nodes_list)
+        self.traverse_genealogy(node.get_ancestor_f(), nodes_list)
 
     def get_all_nodes(self):
         nodes_list = []
