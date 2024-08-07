@@ -92,7 +92,7 @@ class Generations:
             (3, True, ["Indigo", "Ebène"], 0.8),
             (4, False, ["Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène", 
                         "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"], 0.8),
-            (5, True, ["Pourpre", "Orchidée"], 0.75),
+            (5, True, ["Pourpre", "Orchidée"], 0.7),
             (6, False, ["Pourpre et Rousse", "Orchidée et Rousse", "Amande et Pourpre", "Amande et Orchidée", 
                         "Dorée et Pourpre", "Dorée et Orchidée", "Indigo et Pourpre", "Indigo et Orchidée", 
                         "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"], 0.6),
@@ -301,7 +301,6 @@ class Elevage:
         nouvel_id = len(self.dragodindes) + 1
         sexe = random.choice(['M', 'F'])
         dic_probability = self.round_dict_values(self.crossing(male, female))
-        print("dic_probability : ", dic_probability)
         couleur = self.choice_color(dic_probability)
         
         # Create an new dd
