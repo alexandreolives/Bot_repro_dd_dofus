@@ -87,26 +87,26 @@ class Generations:
     def initialize_generations(self):
 
         generations_data = [
-            (1, True, ["Rousse", "Amande", "Dorée"], 0.2),
-            (2, False, ["Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"], 0.25),
-            (3, True, ["Indigo", "Ebène"], 0.25),
+            (1, True, ["Rousse", "Amande", "Dorée"], 1.0),
+            (2, False, ["Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"], 0.8),
+            (3, True, ["Indigo", "Ebène"], 0.8),
             (4, False, ["Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène", 
-                        "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"], 0.25),
-            (5, True, ["Pourpre", "Orchidée"], 0.33),
+                        "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"], 0.8),
+            (5, True, ["Pourpre", "Orchidée"], 0.75),
             (6, False, ["Pourpre et Rousse", "Orchidée et Rousse", "Amande et Pourpre", "Amande et Orchidée", 
                         "Dorée et Pourpre", "Dorée et Orchidée", "Indigo et Pourpre", "Indigo et Orchidée", 
-                        "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"], 0.33),
-            (7, True, ["Ivoire", "Turquoise"], 0.33),
+                        "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"], 0.6),
+            (7, True, ["Ivoire", "Turquoise"], 0.5),
             (8, False, ["Ivoire et Rousse", "Turquoise et Rousse", "Amande et Ivoire", "Amande et Turquoise", 
                         "Dorée et Ivoire", "Dorée et Turquoise", "Indigo et Ivoire", "Indigo et Turquoise", 
                         "Ebène et Ivoire", "Ebène et Turquoise", "Pourpre et Ivoire", "Turquoise et Pourpre", 
-                        "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"], 0.5),
-            (9, True, ["Emeraude", "Prune"], 0.5),
+                        "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"], 0.4),
+            (9, True, ["Emeraude", "Prune"], 0.3),
             (10, False, ["Rousse et Emeraude", "Rousse et Prune", "Amande et Emeraude", "Amande et Prune", 
                          "Dorée et Emeraude", "Dorée et Prune", "Indigo et Emeraude", "Indigo et Prune", 
                          "Ebène et Emeraude", "Ebène et Prune", "Pourpre et Emeraude", "Pourpre et Prune", 
                          "Orchidée et Emeraude", "Orchidée et Prune", "Ivoire et Emeraude", "Ivoire et Prune", 
-                         "Turquoise et Emeraude", "Turquoise et Prune"], 1.0)
+                         "Turquoise et Emeraude", "Turquoise et Prune"], 0.2)
         ]
         generations = []
 
@@ -286,7 +286,7 @@ class Elevage:
         return self.generations.get_generation_by_color(color)
 
     def round_dict_values(self, input_dict):
-        return {key: round(value, 4) for key, value in input_dict.items()}
+        return {key: round(value*100, 2) for key, value in input_dict.items()}
 
     def accouplement_naissance(self, male: Dragodinde, female: Dragodinde):
         if male is None or female is None:
@@ -301,6 +301,7 @@ class Elevage:
         nouvel_id = len(self.dragodindes) + 1
         sexe = random.choice(['M', 'F'])
         dic_probability = self.round_dict_values(self.crossing(male, female))
+        print("dic_probability : ", dic_probability)
         couleur = self.choice_color(dic_probability)
         
         # Create an new dd
