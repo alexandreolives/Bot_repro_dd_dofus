@@ -1,8 +1,6 @@
 from dd_class import Elevage
 from dd_class import Dragodinde
 import random
-import time
-import sys
 
 class Random_crossing :
     def __init__(self) :

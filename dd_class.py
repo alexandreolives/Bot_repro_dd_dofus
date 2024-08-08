@@ -74,7 +74,7 @@ class Generations:
     def get_apprentissage_by_color(self, color:str) -> float :
         for generation in self.generations:
             if color in generation.get_colors():
-                return generation.get_apprendissage()
+                return generation.get_apprendissage()[generation.get_colors().index(color)]
         raise ValueError("Color not find in the generations object")
     
     def get_list_bicolor(self) -> list :
@@ -87,26 +87,32 @@ class Generations:
     def initialize_generations(self):
 
         generations_data = [
-            (1, True, ["Rousse", "Amande", "Dorée"], 1.0),
-            (2, False, ["Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"], 0.8),
-            (3, True, ["Indigo", "Ebène"], 0.8),
-            (4, False, ["Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène", 
-                        "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"], 0.8),
-            (5, True, ["Pourpre", "Orchidée"], 0.7),
-            (6, False, ["Pourpre et Rousse", "Orchidée et Rousse", "Amande et Pourpre", "Amande et Orchidée", 
+            (1, True, ("Rousse", "Amande", "Dorée"), (1.0, 1.0, 0.2)),
+            (2, False, ("Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"), (0.8, 0.8, 0.8)),
+            (3, True, ("Indigo", "Ebène"), (0.8, 0.8)),
+            (4, False, ("Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène", 
+                        "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"), (0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8)),
+            (5, True, ("Pourpre", "Orchidée"), (0.7, 0.7)),
+            (6, False, ("Pourpre et Rousse", "Orchidée et Rousse", "Amande et Pourpre", "Amande et Orchidée", 
                         "Dorée et Pourpre", "Dorée et Orchidée", "Indigo et Pourpre", "Indigo et Orchidée", 
-                        "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"], 0.6),
-            (7, True, ["Ivoire", "Turquoise"], 0.5),
-            (8, False, ["Ivoire et Rousse", "Turquoise et Rousse", "Amande et Ivoire", "Amande et Turquoise", 
+                        "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"), (0.6, 0.6, 0.6, 0.6, 0.6,
+                                                                                          0.6, 0.6, 0.6, 0.6, 0.6, 0.6)),
+            (7, True, ("Ivoire", "Turquoise"), (0.5, 0.5)),
+            (8, False, ("Ivoire et Rousse", "Turquoise et Rousse", "Amande et Ivoire", "Amande et Turquoise", 
                         "Dorée et Ivoire", "Dorée et Turquoise", "Indigo et Ivoire", "Indigo et Turquoise", 
                         "Ebène et Ivoire", "Ebène et Turquoise", "Pourpre et Ivoire", "Turquoise et Pourpre", 
-                        "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"], 0.4),
-            (9, True, ["Emeraude", "Prune"], 0.3),
-            (10, False, ["Rousse et Emeraude", "Rousse et Prune", "Amande et Emeraude", "Amande et Prune", 
+                        "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"), (0.4, 0.4, 0.4, 0.4, 0.4,
+                                                                                                0.4, 0.4, 0.4, 0.4, 0.4,
+                                                                                                0.4, 0.4, 0.4)),
+            (9, True, ("Emeraude", "Prune"), (0.3, 0.3)),
+            (10, False, ("Rousse et Emeraude", "Rousse et Prune", "Amande et Emeraude", "Amande et Prune", 
                          "Dorée et Emeraude", "Dorée et Prune", "Indigo et Emeraude", "Indigo et Prune", 
                          "Ebène et Emeraude", "Ebène et Prune", "Pourpre et Emeraude", "Pourpre et Prune", 
                          "Orchidée et Emeraude", "Orchidée et Prune", "Ivoire et Emeraude", "Ivoire et Prune", 
-                         "Turquoise et Emeraude", "Turquoise et Prune"], 0.2)
+                         "Turquoise et Emeraude", "Turquoise et Prune"), (0.2, 0.2, 0.2, 0.2, 0.2,
+                                                                          0.2, 0.2, 0.2, 0.2, 0.2,
+                                                                          0.2, 0.2, 0.2, 0.2, 0.2,
+                                                                          0.2, 0.2, 0.2))
         ]
         generations = []
 
