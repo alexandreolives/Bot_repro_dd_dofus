@@ -72,7 +72,6 @@ class Random_crossing :
 
         # Assuming accouplement_naissance is a method that performs crossing and returns probabilities
         nouvelle_dd, _ = self.elevage.accouplement_naissance(male, female)
-        print(nouvelle_dd.get_couleur())
 
         return nouvelle_dd.get_generation()
     
@@ -80,7 +79,7 @@ if __name__ == "__main__" :
 
     elevage = Random_crossing()
     better_generation = 1
-    for i in range(2000) :
+    for i in range(1000) :
         higher_generation = elevage.random_crosing_better_gen()
         if higher_generation > better_generation :
             better_generation = higher_generation

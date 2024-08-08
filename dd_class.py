@@ -122,9 +122,9 @@ class Elevage:
         self.dragodindes = dragodindes
         self.generations = Generations()
         self.special_cases = {
-            "Rousse et Dorée": ["Indigo", "Orchidée"],
+            "Rousse et Dorée": ["Ebène", "Orchidée"],
             "Amande et Dorée": ["Indigo", "Ebène"],
-            "Rousse et Amande": ["Ebène", "Pourpre"],
+            "Rousse et Amande": ["Indigo", "Pourpre"],
             "Indigo et Ebène": ["Orchidée", "Pourpre"],
             "Pourpre et Orchidée": ["Ivoire", "Turquoise"],
             "Indigo et Pourpre": ["Ivoire"],
@@ -159,9 +159,10 @@ class Elevage:
         return any(element in list2 for element in list1)
     
     def check_compatibility(self, color_A:str, color_B:str) -> bool :
+
         # True case : mono-mono / bi-bi with special case
         # bi-bi with special case
-        if " et " in color_A and " et " in color_B and (color_A in self.special_cases.values() and color_B in self.special_cases.values()):
+        if " et " in color_A and " et " in color_B and (color_A in self.special_cases.keys() and color_B in self.special_cases.keys()):
             if self.has_common_element(self.special_cases[color_A], self.special_cases[color_B]) :
                 return True
             
@@ -262,7 +263,7 @@ class Elevage:
 
             dic_dinde_m[color_m] = dic_dinde_m.get(color_m, 0) + weight_m 
             dic_dinde_f[color_f] = dic_dinde_f.get(color_f, 0) + weight_f
-
+        
         # Crossing both dic 
         for color_m, weight_m in dic_dinde_m.items() :
             for color_f, weight_f in dic_dinde_f.items() :
