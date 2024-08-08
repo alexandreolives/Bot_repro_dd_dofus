@@ -137,17 +137,17 @@ class Elevage:
         self.list_bicolor_dd = self.generations.get_list_bicolor()
 
     def __str__(self):
-        return "\n".join(str(dragodinde) for dragodinde in self.dragodindes)
+        return "\n".join(str(dragodinde.get_couleur()) for dragodinde in self.dragodindes)
 
+    def get_dragodindes(self) :
+        return self.dragodindes
+    
     def get_dd_by_id(self, id: int) :
         for dragodinde in self.dragodindes:
             if dragodinde.get_id() == id :
                 return dragodinde
         raise ValueError(f"ID = {id}, not find in the elevage")
     
-    def add_DD(self, dragodinde:Dragodinde) :
-        self.dragodindes.append(dragodinde)
-
     def check_mort(self, dragodinde:Dragodinde) :
         if dragodinde.get_nombre_reproductions() >= 20:
             self.dragodindes = [dd for dd in self.dragodindes if dd.id != dragodinde.get_id()]
@@ -165,11 +165,12 @@ class Elevage:
             if self.has_common_element(self.special_cases[color_A], self.special_cases[color_B]) :
                 return True
             
-        # mono-mono
+        # mono-mono (but not the same color)
         elif " et " not in color_A and " et " not in color_B :
-            return True
+            if color_A != color_B :
+                return True
         
-        # False case : mono-bi / bi-mono / bi-bi with no special case 
+        # False case : mono-bi / bi-mono / bi-bi with no specila case / mono == mono
         return False
 
     def identify_new_color(self, color_A:str, color_B:str) -> str :
@@ -394,11 +395,11 @@ class Genealogie:
         return self.get_ancestors_at_level(self.root_node, 0, level)
 
     def traverse_genealogy(self, node, nodes_list):
-        if node is None:
-            return
-        nodes_list.append(node)
-        self.traverse_genealogy(node.get_ancestor_m(), nodes_list)
-        self.traverse_genealogy(node.get_ancestor_f(), nodes_list)
+            if node is None:
+                return
+            nodes_list.append(node)
+            self.traverse_genealogy(node.get_ancestor_m(), nodes_list)
+            self.traverse_genealogy(node.get_ancestor_f(), nodes_list)
 
     def get_all_nodes(self):
         nodes_list = []
