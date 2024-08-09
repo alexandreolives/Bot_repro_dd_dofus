@@ -32,9 +32,7 @@ class TestGenealogie(unittest.TestCase):
         self.genealogy.update_weights_and_colors()
         all_nodes = self.genealogy.get_all_nodes()
         initiated_nodes = [node.get_weight() for node in all_nodes]
-        expected_weights = [10/42, 6/42, 3/42, 1/42, 1/42, 3/42, 1/42,
-                            1/42, 6/42, 3/42, 1/42, 1/42, 3/42, 1/42, 
-                            1/42]
+        expected_weights = [10/42, 6/42, 3/42, 1/42, 1/42, 3/42]
         self.assertEqual(initiated_nodes, expected_weights)
 
 class TestCrosing(unittest.TestCase):
@@ -119,87 +117,87 @@ class TestCrosing(unittest.TestCase):
                                          self.dd_sm1, self.dd_sm2, self.dd_sb1, self.dd_sb2,
                                          self.dd_fb1, self.dd_fb2])
 
-    # def uni_test_bad_crosing(self):
-    #     with self.assertRaises(ValueError) as context:
-    #         self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(3))
+    def uni_test_bad_crosing(self):
+        with self.assertRaises(ValueError) as context:
+            self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(3))
 
-    #     self.assertEqual(str(context.exception), "Cannot breed dragodindes of the same sex.")
+        self.assertEqual(str(context.exception), "Cannot breed dragodindes of the same sex.")
 
-    # def test_crosing_mono_mono(self):
-    #     _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(2))
-    #     expected_probability = {
-    #             "Rousse": 33.75,
-    #             "Amande": 33.75,
-    #             "Indigo": 11.25,
-    #             "Ebène": 11.25,
-    #             "Rousse et Amande": 5.62,
-    #             "Amande et Indigo": 1.87,
-    #             "Rousse et Ebène": 1.87,
-    #             "Indigo et Ebène": 0.63
-    #         }
+    def test_crosing_mono_mono(self):
+        _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(2))
+        expected_probability = {
+                "Rousse": 33.75,
+                "Amande": 33.75,
+                "Indigo": 11.25,
+                "Ebène": 11.25,
+                "Rousse et Amande": 5.62,
+                "Amande et Indigo": 1.87,
+                "Rousse et Ebène": 1.87,
+                "Indigo et Ebène": 0.63
+            }
 
-    #     print("dic_probability mono-mono: ", dic_probability, '\n')
-    #     self.assertEqual(dic_probability, expected_probability)
+        print("dic_probability mono-mono: ", dic_probability, '\n')
+        self.assertEqual(dic_probability, expected_probability)
     
-    # def test_crosing_mono_bi(self):
-    #     _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(4))
-    #     expected_probability = {
-    #             "test" : 1
-    #         }
+    def test_crosing_mono_bi(self):
+        _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(4))
+        expected_probability = {
+                "test" : 1
+            }
 
-    #     print("dic_probability mono-bi : ", dic_probability, '\n')
-    #     self.assertEqual(dic_probability, expected_probability)
+        print("dic_probability mono-bi : ", dic_probability, '\n')
+        self.assertEqual(dic_probability, expected_probability)
     
-    # def test_crosing_bi_bi(self):
-    #     _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(3), self.elevage.get_dd_by_id(4))
-    #     expected_probability = {
-    #             "test" : 1
-    #         }
+    def test_crosing_bi_bi(self):
+        _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(3), self.elevage.get_dd_by_id(4))
+        expected_probability = {
+                "test" : 1
+            }
         
-    #     print("dic_probability bi-bi : ", dic_probability, '\n')
-    #     self.assertEqual(dic_probability, expected_probability)
+        print("dic_probability bi-bi : ", dic_probability, '\n')
+        self.assertEqual(dic_probability, expected_probability)
 
-    # def test_crosing_simple_mono_bi(self):
-    #     _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(100), self.elevage.get_dd_by_id(201))
-    #     expected_probability = {
-    #             "Rousse" : 83.33,
-    #             "Pourpre et Ivoire" : 16.67
-    #         }
+    def test_crosing_simple_mono_bi(self):
+        _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(100), self.elevage.get_dd_by_id(201))
+        expected_probability = {
+                "Rousse" : 83.33,
+                "Pourpre et Ivoire" : 16.67
+            }
         
-    #     print("dic_probability simple mono-bi : ", dic_probability, '\n')
-    #     self.assertEqual(dic_probability, expected_probability)
+        print("dic_probability simple mono-bi : ", dic_probability, '\n')
+        self.assertEqual(dic_probability, expected_probability)
 
-    # def test_crosing_simple_mono_mono(self):
-    #     _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(100), self.elevage.get_dd_by_id(101))
-    #     expected_probability = {
-    #             "Rousse" : 45.45,
-    #             "Amande" : 45.45,
-    #             "Rousse et Amande" : 9.09,
-    #         }
+    def test_crosing_simple_mono_mono(self):
+        _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(100), self.elevage.get_dd_by_id(101))
+        expected_probability = {
+                "Rousse" : 45.45,
+                "Amande" : 45.45,
+                "Rousse et Amande" : 9.09,
+            }
         
-    #     print("dic_probability simple mono-mono : ", dic_probability, '\n')
-    #     self.assertEqual(dic_probability, expected_probability)
+        print("dic_probability simple mono-mono : ", dic_probability, '\n')
+        self.assertEqual(dic_probability, expected_probability)
 
-    # def test_crosing_simple_bi_bi(self):
-    #     _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(200), self.elevage.get_dd_by_id(201))
-    #     expected_probability = {
-    #             "Indigo et Orchidée" : 60.0,
-    #             "Pourpre et Ivoire" : 40.0,
-    #         }
+    def test_crosing_simple_bi_bi(self):
+        _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(200), self.elevage.get_dd_by_id(201))
+        expected_probability = {
+                "Indigo et Orchidée" : 60.0,
+                "Pourpre et Ivoire" : 40.0,
+            }
         
-    #     print("dic_probability simple bi-bi : ", dic_probability, '\n')
-    #     self.assertEqual(dic_probability, expected_probability)
+        print("dic_probability simple bi-bi : ", dic_probability, '\n')
+        self.assertEqual(dic_probability, expected_probability)
 
     def test_crosing_first_bi_bi(self):
         _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(300), self.elevage.get_dd_by_id(301))
         expected_probability = {
-                "Rousse et Dorée" : 19.8,
-                "Amande et Dorée" : 19.8,
-                "Dorée" : 17.8,
-                "Amande" : 17.6,
-                "Rousse" : 17.6,
-                "Ebène" : 6.9,
-                "Rousse et Amande" : 0.7,
+                "Rousse et Dorée" : 19.76,
+                "Amande et Dorée" : 19.76,
+                "Dorée" : 17.83,
+                "Amande" : 17.55,
+                "Rousse" : 17.55,
+                "Ebène" : 6.89,
+                "Rousse et Amande" : 0.68,
             }
         
         print("dic_probability first bi-bi : ", dic_probability, '\n')

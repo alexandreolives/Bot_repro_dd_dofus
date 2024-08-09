@@ -121,6 +121,99 @@ class Generations:
             generations.append(generation)
 
         return generations
+
+
+class Node:
+    def __init__(self, color=None, weight=None, ancestor_m=None, ancestor_f=None):
+        self.color = color
+        self.weight = weight
+        self.ancestor_m = ancestor_m
+        self.ancestor_f = ancestor_f
+
+    def get_color(self):
+        return self.color
+
+    def set_color(self, color):
+        self.color = color
+
+    def get_ancestor_m(self):
+        return self.ancestor_m
+
+    def get_ancestor_f(self):
+        return self.ancestor_f
+
+    def set_weight(self, weight):
+        self.weight = weight
+
+    def get_weight(self):
+        return self.weight
+    
+    def __str__(self):
+        return (f"color: {self.color}\n"
+                f"weight: {self.weight}\n"
+                f"ancestor_m: {self.ancestor_m}\n"
+                f"ancestor_f: {self.ancestor_f}\n")
+
+class Genealogie:
+    def __init__(self, root_node:Node):
+        self.root_node = root_node
+
+    def get_node(self) :
+        return self.root_node
+
+    def init_weight(self, node, current_level, dic_weight_level):
+        if current_level > 3 or node is None:
+            return
+
+        node.set_weight(dic_weight_level[current_level])
+        parents = [node.get_ancestor_m(), node.get_ancestor_f()]
+
+        for i, parent in enumerate(parents):
+            if current_level < 3 :
+                if i == 0:
+                    node.ancestor_m = parent
+                else :
+                    node.ancestor_f = parent
+            
+            self.init_weight(parent, current_level + 1, dic_weight_level)
+
+    def update_weights_and_colors(self) :
+        dic_weight_level = {0: 10/42, 1: 6/42, 2: 3/42, 3: 1/42} # weight
+        dump = Node(None, None, self.root_node)
+        self.init_weight(self.root_node, 0, dic_weight_level)
+        return Genealogie(dump.get_ancestor_m())
+
+    def get_ancestors_at_level(self, node, current_level, level):
+        if node is None:
+            return []
+        if current_level == level:
+            return [node.get_color()]
+        else:
+            ancestors = []
+            ancestors += self.get_ancestors_at_level(node.get_ancestor_m(), current_level + 1, level)
+            ancestors += self.get_ancestors_at_level(node.get_ancestor_f(), current_level + 1, level)
+            return ancestors
+
+    def get_genealogie(self, level):
+        return self.get_ancestors_at_level(self.root_node, 0, level)
+
+    def traverse_genealogy(self, node, nodes_list):
+            if node is None:
+                return
+            nodes_list.append(node)
+            self.traverse_genealogy(node.get_ancestor_m(), nodes_list)
+            self.traverse_genealogy(node.get_ancestor_f(), nodes_list)
+
+    def get_all_nodes(self):
+        nodes_list = []
+        self.traverse_genealogy(self.root_node, nodes_list)
+        return nodes_list
+    
+    def __str__(self):
+        return (f"individu: {self.get_genealogie(0)}\n"
+                f"parents: {self.get_genealogie(1)}\n"
+                f"grand parents: {self.get_genealogie(2)}\n"
+                f"great-grand parents: {self.get_genealogie(3)}")
     
 class Elevage:  
 
@@ -296,6 +389,10 @@ class Elevage:
     def round_dict_values(self, input_dict):
         return {key: round(value*100, 2) for key, value in input_dict.items()}
 
+    def normalise_proba(self, proba_dict : dict) -> dict :
+        # Divide each value by the total sum to normalize
+        return {key: value / sum(proba_dict.values()) for key, value in proba_dict.items()}
+           
     def accouplement_naissance(self, male: Dragodinde, female: Dragodinde):
         if male is None or female is None:
             raise ValueError("One or both of the Dragodindes do not exist.")
@@ -308,7 +405,8 @@ class Elevage:
         female.add_reproduction()
         nouvel_id = len(self.dragodindes) + 1
         sexe = random.choice(['M', 'F'])
-        dic_probability = self.round_dict_values(self.crossing(male, female))
+        dic_probability = self.crossing(male, female)
+        dic_probability = self.round_dict_values(self.normalise_proba(dic_probability))
         couleur = self.choice_color(dic_probability)
         
         # Create an new dd
@@ -325,98 +423,13 @@ class Elevage:
 
         return nouvelle_dd, dic_probability
 
-class Node:
-    def __init__(self, color=None, weight=None, ancestor_m=None, ancestor_f=None):
-        self.color = color
-        self.weight = weight
-        self.ancestor_m = ancestor_m
-        self.ancestor_f = ancestor_f
 
-    def get_color(self):
-        return self.color
 
-    def set_color(self, color):
-        self.color = color
 
-    def get_ancestor_m(self):
-        return self.ancestor_m
 
-    def get_ancestor_f(self):
-        return self.ancestor_f
 
-    def set_weight(self, weight):
-        self.weight = weight
 
-    def get_weight(self):
-        return self.weight
-    
-    def __str__(self):
-        return (f"color: {self.color}\n"
-                f"weight: {self.weight}\n"
-                f"ancestor_m: {self.ancestor_m}\n"
-                f"ancestor_f: {self.ancestor_f}\n")
 
-class Genealogie:
-    def __init__(self, root_node:Node):
-        self.root_node = root_node
 
-    def get_node(self) :
-        return self.root_node
 
-    def init_weight(self, node, current_level, dic_weight_level):
-        if current_level > 3 or node is None:
-            return
 
-        node.set_weight(dic_weight_level[current_level])
-        parents = [node.get_ancestor_m(), node.get_ancestor_f()]
-
-        for i, parent in enumerate(parents):
-            if current_level < 3 :
-                if parent is None :
-                    parent = Node(node.get_color(), dic_weight_level[current_level+1])
-                if i == 0:
-                    node.ancestor_m = parent
-                if i == 1:
-                    node.ancestor_f = parent
-            
-            self.init_weight(parent, current_level + 1, dic_weight_level)
-
-    # TODO : change do not update color where None is found 
-    def update_weights_and_colors(self) :
-        dic_weight_level = {0: 10/42, 1: 6/42, 2: 3/42, 3: 1/42} # weight
-        dump = Node(None, None, self.root_node)
-        self.init_weight(self.root_node, 0, dic_weight_level)
-        return Genealogie(dump.get_ancestor_m())
-
-    def get_ancestors_at_level(self, node, current_level, level):
-        if node is None:
-            return []
-        if current_level == level:
-            return [node.get_color()]
-        else:
-            ancestors = []
-            ancestors += self.get_ancestors_at_level(node.get_ancestor_m(), current_level + 1, level)
-            ancestors += self.get_ancestors_at_level(node.get_ancestor_f(), current_level + 1, level)
-            return ancestors
-
-    def get_genealogie(self, level):
-        return self.get_ancestors_at_level(self.root_node, 0, level)
-
-    def traverse_genealogy(self, node, nodes_list):
-            if node is None:
-                return
-            nodes_list.append(node)
-            self.traverse_genealogy(node.get_ancestor_m(), nodes_list)
-            self.traverse_genealogy(node.get_ancestor_f(), nodes_list)
-
-    def get_all_nodes(self):
-        nodes_list = []
-        self.traverse_genealogy(self.root_node, nodes_list)
-        return nodes_list
-    
-    def __str__(self):
-        return (f"individu: {self.get_genealogie(0)}\n"
-                f"parents: {self.get_genealogie(1)}\n"
-                f"grand parents: {self.get_genealogie(2)}\n"
-                f"great-grand parents: {self.get_genealogie(3)}")
-    
