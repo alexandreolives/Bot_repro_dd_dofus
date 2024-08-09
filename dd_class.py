@@ -381,6 +381,7 @@ class Genealogie:
             
             self.init_weight(parent, current_level + 1, dic_weight_level)
 
+    # TODO : change do not update color where None is found 
     def update_weights_and_colors(self) :
         dic_weight_level = {0: 10/42, 1: 6/42, 2: 3/42, 3: 1/42} # weight
         dump = Node(None, None, self.root_node)
