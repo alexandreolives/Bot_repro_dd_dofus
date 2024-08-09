@@ -1,14 +1,30 @@
 from collections import defaultdict 
 import random 
+#from dataclasses import dataclass, field
+#from typing import Optional
 
+
+# @dataclass
 class Dragodinde:
     def __init__(self, id : int, sex: str, couleur: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
         self.id = id
         self.sex = sex
         self.couleur = couleur
         self.generation = generation
-        self.arbre_genealogique = arbre_genealogique.update_weights_and_colors() if arbre_genealogique is not None else Genealogie(Node(couleur, 10)).update_weights_and_colors()
+        self.arbre_genealogique = arbre_genealogique
         self.nombre_reproductions = nombre_reproductions
+
+        # Initialize arbre_genealogique
+        if arbre_genealogique is not None:
+            self.arbre_genealogique = arbre_genealogique.update_weights()
+        else:
+            self.arbre_genealogique = Genealogie(Node(self.couleur, 10/42))
+
+        if self.sex not in ("M", "F"):
+            raise ValueError("sex must be 'M' or 'F'")
+        
+        if self.generation < 0:
+            raise ValueError("generation must be a positive integer")
 
     def get_id(self):
         return self.id
@@ -87,6 +103,7 @@ class Generations:
     def initialize_generations(self):
  
         generations_data = [
+            # (genereation, monocolor, list(colors), list(V(x))
             (1, True, ("Rousse", "Amande", "Dorée"), (1.0, 1.0, 0.2)),
             (2, False, ("Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"), (0.8, 0.8, 0.8)),
             (3, True, ("Indigo", "Ebène"), (0.8, 0.8)),
@@ -122,7 +139,6 @@ class Generations:
 
         return generations
 
-
 class Node:
     def __init__(self, color=None, weight=None, ancestor_m=None, ancestor_f=None):
         self.color = color
@@ -133,27 +149,25 @@ class Node:
     def get_color(self):
         return self.color
 
-    def set_color(self, color):
-        self.color = color
-
     def get_ancestor_m(self):
         return self.ancestor_m
 
     def get_ancestor_f(self):
         return self.ancestor_f
 
+    def get_weight(self):
+        return self.weight
+
     def set_weight(self, weight):
         self.weight = weight
 
-    def get_weight(self):
-        return self.weight
-    
     def __str__(self):
         return (f"color: {self.color}\n"
                 f"weight: {self.weight}\n"
                 f"ancestor_m: {self.ancestor_m}\n"
                 f"ancestor_f: {self.ancestor_f}\n")
 
+# heritage Node ?
 class Genealogie:
     def __init__(self, root_node:Node):
         self.root_node = root_node
@@ -177,7 +191,7 @@ class Genealogie:
             
             self.init_weight(parent, current_level + 1, dic_weight_level)
 
-    def update_weights_and_colors(self) :
+    def update_weights(self) :
         dic_weight_level = {0: 10/42, 1: 6/42, 2: 3/42, 3: 1/42} # weight
         dump = Node(None, None, self.root_node)
         self.init_weight(self.root_node, 0, dic_weight_level)
@@ -296,7 +310,6 @@ class Elevage:
         else :
             raise ValueError(f"{color_A} and {color_B} are not suppose to combine here")
 
-    
     def calcul_PGC(self, apprentissage_value:float, generation:int) -> float :
         return (100*apprentissage_value)/(2-(generation%2))
     
@@ -422,14 +435,3 @@ class Elevage:
         self.check_mort(female)
 
         return nouvelle_dd, dic_probability
-
-
-
-
-
-
-
-
-
-
-
