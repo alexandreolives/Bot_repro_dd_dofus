@@ -1,6 +1,7 @@
 from dd_class import Elevage
 from dd_class import Dragodinde
 import random
+import time 
 
 class Random_crossing :
     def __init__(self) :
@@ -72,15 +73,34 @@ class Random_crossing :
         nouvelle_dd, _ = self.elevage.accouplement_naissance(male, female)
 
         return nouvelle_dd.get_generation()
+
+    def random_crosing(self):
+        males = [dd for dd in self.elevage.get_dragodindes() if dd.get_sex() == "M"]
+        females = [dd for dd in self.elevage.get_dragodindes() if dd.get_sex() == "F"]
+
+        if not males or not females:
+            raise ValueError("No suitable pairs for crossing.")
+
+        male = random.choice(males)
+        female = random.choice(females)
+
+        # Assuming accouplement_naissance is a method that performs crossing and returns probabilities
+        nouvelle_dd, _ = self.elevage.accouplement_naissance(male, female)
+
+        return nouvelle_dd.get_generation()
     
 if __name__ == "__main__" :
 
+    start_time = time.time()
     elevage = Random_crossing()
     better_generation = 1
-    for i in range(1000) :
+    crosing_number = 10000
+    for i in range(crosing_number) :
         higher_generation = elevage.random_crosing_better_gen()
         if higher_generation > better_generation :
             better_generation = higher_generation
     
+    end_time = time.time()
     print(f"Length of the evelage : {elevage.get_length_elevage()}")
     print(f"Better generation so far : {better_generation}")
+    print(f"Time taken to compute {crosing_number} crossing : {end_time - start_time:.6f} seconds")
