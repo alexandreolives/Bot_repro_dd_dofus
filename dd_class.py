@@ -85,7 +85,7 @@ class Generations:
         return list_bicolor
     
     def initialize_generations(self):
-
+ 
         generations_data = [
             (1, True, ("Rousse", "Amande", "Dorée"), (1.0, 1.0, 0.2)),
             (2, False, ("Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"), (0.8, 0.8, 0.8)),
