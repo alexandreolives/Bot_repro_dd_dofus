@@ -160,26 +160,26 @@ class TestCrosing(unittest.TestCase):
     def test_crosing_bi_bi(self):
         _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(3), self.elevage.get_dd_by_id(4))
         expected_probability = {
-                "Rousse et Amande" : 16.59,
-                "Pourpre et Orchidée" : 13.32,
-                "Amande et Indigo" : 10.30,
-                "Pourpre et Rousse" : 9.30,
-                "Indigo et Ebène" : 8.51,
-                "Indigo et Orchidée" : 4.65,
-                "Ivoire et Prune" : 4.15,
-                "Ebène et Ivoire" : 3.91,
-                "Amande et Turquoise" : 3.91,
-                "Rousse et Prune" : 3.38,
-                "Indigo et Ivoire" : 3.23,
-                "Rousse et Ebène" : 3.23,
-                "Amande et Ivoire" : 3.23,
-                "Turquoise et Rousse" : 2.38,
-                "Orchidée et Emeraude" : 2.07,
-                "Dorée et Emeraude" : 2.07,
+                "Rousse et Amande" : 16.595,
+                "Pourpre et Orchidée" : 13.321,
+                "Amande et Indigo" : 10.297,
+                "Pourpre et Rousse" : 9.299,
+                "Indigo et Ebène" : 8.513,
+                "Indigo et Orchidée" : 4.649,
+                "Ivoire et Prune" : 4.148,
+                "Ebène et Ivoire" : 3.913,
+                "Amande et Turquoise" : 3.913,
+                "Rousse et Prune" : 3.378,
+                "Indigo et Ivoire" : 3.234,
+                "Rousse et Ebène" : 3.229,
+                "Amande et Ivoire" : 3.234,
+                "Turquoise et Rousse" : 2.382,
+                "Orchidée et Emeraude" : 2.074,
+                "Dorée et Emeraude" : 2.074,
                 "Dorée et Orchidée" : 1.55,
                 "Orchidée et Rousse" : 1.55,
-                "Dorée et Indigo" : 1.51,
-                "Pourpre" : 1.13
+                "Dorée et Indigo" : 1.513,
+                "Pourpre" : 1.133
 
             }
         
