@@ -3,7 +3,6 @@ import random
 #from dataclasses import dataclass, field
 #from typing import Optional
 
-
 # @dataclass
 class Dragodinde:
     def __init__(self, id : int, sex: str, couleur: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
@@ -103,37 +102,41 @@ class Generations:
     def initialize_generations(self):
  
         generations_data = [
-            # (genereation, monocolor, list(colors), list(V(x))
-            (1, True, ("Rousse", "Amande", "Dorée"), (1.0, 1.0, 0.2)),
-            (2, False, ("Rousse et Amande", "Rousse et Dorée", "Amande et Dorée"), (0.8, 0.8, 0.8)),
-            (3, True, ("Indigo", "Ebène"), (0.8, 0.8)),
-            (4, False, ("Rousse et Indigo", "Rousse et Ebène", "Amande et Indigo", "Amande et Ebène", 
-                        "Dorée et Indigo", "Dorée et Ebène", "Indigo et Ebène"), (0.8, 0.8, 0.8, 0.8, 0.8, 0.8, 0.8)),
-            (5, True, ("Pourpre", "Orchidée"), (0.6, 0.6)),
-            (6, False, ("Pourpre et Rousse", "Orchidée et Rousse", "Amande et Pourpre", "Amande et Orchidée", 
-                        "Dorée et Pourpre", "Dorée et Orchidée", "Indigo et Pourpre", "Indigo et Orchidée", 
-                        "Ebène et Pourpre", "Ebène et Orchidée", "Pourpre et Orchidée"), (0.6, 0.6, 0.6, 0.6, 0.6,
-                                                                                          0.6, 0.6, 0.6, 0.6, 0.6, 0.6)),
-            (7, True, ("Ivoire", "Turquoise"), (0.6, 0.6)),
-            (8, False, ("Ivoire et Rousse", "Turquoise et Rousse", "Amande et Ivoire", "Amande et Turquoise", 
-                        "Dorée et Ivoire", "Dorée et Turquoise", "Indigo et Ivoire", "Indigo et Turquoise", 
-                        "Ebène et Ivoire", "Ebène et Turquoise", "Pourpre et Ivoire", "Turquoise et Pourpre", 
-                        "Ivoire et Orchidée", "Turquoise et Orchidée", "Ivoire et Turquoise"), (0.4, 0.4, 0.4, 0.4, 0.4,
-                                                                                                0.4, 0.4, 0.4, 0.4, 0.4,
-                                                                                                0.4, 0.4, 0.4)),
-            (9, True, ("Emeraude", "Prune"), (0.4, 0.4)),
-            (10, False, ("Rousse et Emeraude", "Rousse et Prune", "Amande et Emeraude", "Amande et Prune", 
-                         "Dorée et Emeraude", "Dorée et Prune", "Indigo et Emeraude", "Indigo et Prune", 
-                         "Ebène et Emeraude", "Ebène et Prune", "Pourpre et Emeraude", "Pourpre et Prune", 
-                         "Orchidée et Emeraude", "Orchidée et Prune", "Ivoire et Emeraude", "Ivoire et Prune", 
-                         "Turquoise et Emeraude", "Turquoise et Prune"), (0.2, 0.2, 0.2, 0.2, 0.2,
-                                                                          0.2, 0.2, 0.2, 0.2, 0.2,
-                                                                          0.2, 0.2, 0.2, 0.2, 0.2,
-                                                                          0.2, 0.2, 0.2))
+            # (generation, monocolor, dict(color: weight))
+            (1, True, {"Rousse": 1.0, "Amande": 1.0, "Dorée": 0.2}),
+            (2, False, {"Rousse et Amande": 0.8, "Rousse et Dorée": 0.8, "Amande et Dorée": 0.8}),
+            (3, True, {"Indigo": 0.8, "Ebène": 0.8}),
+            (4, False, {
+                "Rousse et Indigo": 0.8, "Rousse et Ebène": 0.8, "Amande et Indigo": 0.8, "Amande et Ebène": 0.8,
+                "Dorée et Indigo": 0.8, "Dorée et Ebène": 0.8, "Indigo et Ebène": 0.8
+            }),
+            (5, True, {"Pourpre": 0.6, "Orchidée": 0.6}),
+            (6, False, {
+                "Pourpre et Rousse": 0.6, "Orchidée et Rousse": 0.6, "Amande et Pourpre": 0.6, "Amande et Orchidée": 0.6,
+                "Dorée et Pourpre": 0.6, "Dorée et Orchidée": 0.6, "Indigo et Pourpre": 0.6, "Indigo et Orchidée": 0.6,
+                "Ebène et Pourpre": 0.6, "Ebène et Orchidée": 0.6, "Pourpre et Orchidée": 0.6
+            }),
+            (7, True, {"Ivoire": 0.6, "Turquoise": 0.6}),
+            (8, False, {
+                "Ivoire et Rousse": 0.4, "Turquoise et Rousse": 0.4, "Amande et Ivoire": 0.4, "Amande et Turquoise": 0.4,
+                "Dorée et Ivoire": 0.4, "Dorée et Turquoise": 0.4, "Indigo et Ivoire": 0.4, "Indigo et Turquoise": 0.4,
+                "Ebène et Ivoire": 0.4, "Ebène et Turquoise": 0.4, "Pourpre et Ivoire": 0.4, "Turquoise et Pourpre": 0.4,
+                "Ivoire et Orchidée": 0.4, "Turquoise et Orchidée": 0.4, "Ivoire et Turquoise": 0.4
+            }),
+            (9, True, {"Emeraude": 0.4, "Prune": 0.4}),
+            (10, False, {
+                "Rousse et Emeraude": 0.2, "Rousse et Prune": 0.2, "Amande et Emeraude": 0.2, "Amande et Prune": 0.2,
+                "Dorée et Emeraude": 0.2, "Dorée et Prune": 0.2, "Indigo et Emeraude": 0.2, "Indigo et Prune": 0.2,
+                "Ebène et Emeraude": 0.2, "Ebène et Prune": 0.2, "Pourpre et Emeraude": 0.2, "Pourpre et Prune": 0.2,
+                "Orchidée et Emeraude": 0.2, "Orchidée et Prune": 0.2, "Ivoire et Emeraude": 0.2, "Ivoire et Prune": 0.2,
+                "Turquoise et Emeraude": 0.2, "Turquoise et Prune": 0.2
+            })
         ]
-        generations = []
 
-        for number, monocolor, colors, apprentissage in generations_data:
+        generations = []
+        for number, monocolor, color_weights in generations_data:
+            colors = list(color_weights.keys())          # Extract the colors (keys) from the dictionary
+            apprentissage = list(color_weights.values()) # Extract the weights (values) from the dictionary
             generation = Generation(number, apprentissage, monocolor, colors)
             generations.append(generation)
 
@@ -361,9 +364,6 @@ class Elevage:
         return color_prob
 
     def crossing(self, dinde_m: Dragodinde, dinde_f: Dragodinde) -> dict :
-        
-        print("dinde_m.get_arbre_genealogique() : ", dinde_m.get_arbre_genealogique())
-        print("dinde_f.get_arbre_genealogique() : ", dinde_f.get_arbre_genealogique())
 
         node_list_dinde_m = dinde_m.get_arbre_genealogique().get_all_nodes()
         node_list_dinde_f = dinde_f.get_arbre_genealogique().get_all_nodes()
@@ -380,9 +380,6 @@ class Elevage:
             color_f, weight_f = node_f.get_color(), node_f.get_weight()
             dic_dinde_f[color_f] = dic_dinde_f.get(color_f, 0) + weight_f
         
-        print("dic_dinde_m : ", dic_dinde_m)
-        print("dic_dinde_f : ", dic_dinde_f)
-
         # Crossing both dic 
         for color_m, weight_m in dic_dinde_m.items() :
             for color_f, weight_f in dic_dinde_f.items() :
@@ -396,21 +393,19 @@ class Elevage:
         
         return color_prob
 
-    def choice_color(self, probabilities) :
+    def choice_color(self, probabilities : float) :
         list_color = list(probabilities.keys())
         list_proba = list(probabilities.values())
         selected_color = random.choices(list_color, weights=list_proba, k=1)[0]
-        
         return selected_color
     
     def get_generation(self, color: str) -> int:
         return self.generations.get_generation_by_color(color)
 
-    def round_dict_values(self, input_dict):
+    def round_dict_values(self, input_dict : dict):
         return {key: round(value*100, 2) for key, value in input_dict.items()}
 
     def normalise_proba(self, proba_dict : dict) -> dict :
-        # Divide each value by the total sum to normalize
         return {key: value / sum(proba_dict.values()) for key, value in proba_dict.items()}
            
     def accouplement_naissance(self, male: Dragodinde, female: Dragodinde):
