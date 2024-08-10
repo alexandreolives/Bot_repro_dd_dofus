@@ -1,5 +1,5 @@
 from collections import defaultdict 
-import random 
+import random
 #from dataclasses import dataclass, field
 #from typing import Optional
 
@@ -77,9 +77,6 @@ class Generations:
     def __init__(self):
         self.generations = self.initialize_generations()
 
-    def get_generations(self):
-        return [str(gen) for gen in self.generations]
-    
     def get_generation_by_color(self, color: str) -> int:
         for generation in self.generations:
             if color in generation.get_colors():
@@ -214,16 +211,16 @@ class Genealogie:
     def get_genealogie(self, level):
         return self.get_ancestors_at_level(self.root_node, 0, level)
 
-    def traverse_genealogy(self, node, nodes_list):
-        if node is None:
+    def traverse_genealogy(self, node, nodes_list, current_level):
+        if node is None or current_level > 3:
             return
         nodes_list.append(node)
-        self.traverse_genealogy(node.get_ancestor_m(), nodes_list)
-        self.traverse_genealogy(node.get_ancestor_f(), nodes_list)
+        self.traverse_genealogy(node.get_ancestor_m(), nodes_list, current_level + 1)
+        self.traverse_genealogy(node.get_ancestor_f(), nodes_list, current_level + 1)
 
     def get_all_nodes(self):
         nodes_list = []
-        self.traverse_genealogy(self.root_node, nodes_list)
+        self.traverse_genealogy(self.root_node, nodes_list, 0)
         return nodes_list
     
     def __str__(self):
@@ -257,6 +254,9 @@ class Elevage:
 
     def get_dragodindes(self) :
         return self.dragodindes
+    
+    def get_special_cases_keys(self) :
+        return self.special_cases.keys()
     
     def get_dd_by_id(self, id: int) :
         for dragodinde in self.dragodindes:
