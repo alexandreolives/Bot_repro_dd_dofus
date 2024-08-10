@@ -403,7 +403,7 @@ class Elevage:
         return self.generations.get_generation_by_color(color)
 
     def round_dict_values(self, input_dict : dict):
-        return {key: round(value*100, 2) for key, value in input_dict.items()}
+        return {key: round(value*100, 3) for key, value in input_dict.items()}
 
     def normalise_proba(self, proba_dict : dict) -> dict :
         return {key: value / sum(proba_dict.values()) for key, value in proba_dict.items()}
