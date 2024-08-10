@@ -212,11 +212,11 @@ class Genealogie:
         return self.get_ancestors_at_level(self.root_node, 0, level)
 
     def traverse_genealogy(self, node, nodes_list):
-            if node is None:
-                return
-            nodes_list.append(node)
-            self.traverse_genealogy(node.get_ancestor_m(), nodes_list)
-            self.traverse_genealogy(node.get_ancestor_f(), nodes_list)
+        if node is None:
+            return
+        nodes_list.append(node)
+        self.traverse_genealogy(node.get_ancestor_m(), nodes_list)
+        self.traverse_genealogy(node.get_ancestor_f(), nodes_list)
 
     def get_all_nodes(self):
         nodes_list = []
@@ -362,6 +362,9 @@ class Elevage:
 
     def crossing(self, dinde_m: Dragodinde, dinde_f: Dragodinde) -> dict :
         
+        print("dinde_m.get_arbre_genealogique() : ", dinde_m.get_arbre_genealogique())
+        print("dinde_f.get_arbre_genealogique() : ", dinde_f.get_arbre_genealogique())
+
         node_list_dinde_m = dinde_m.get_arbre_genealogique().get_all_nodes()
         node_list_dinde_f = dinde_f.get_arbre_genealogique().get_all_nodes()
         dic_dinde_m = dict()
@@ -369,13 +372,17 @@ class Elevage:
         color_prob = defaultdict(float)
 
         # Create 2 color dict from both genealogic tree 
-        for node_m, node_f in zip(node_list_dinde_m, node_list_dinde_f) :
+        for node_m in node_list_dinde_m :
             color_m, weight_m = node_m.get_color(), node_m.get_weight()
-            color_f, weight_f = node_f.get_color(), node_f.get_weight()
-
             dic_dinde_m[color_m] = dic_dinde_m.get(color_m, 0) + weight_m 
+        
+        for node_f in node_list_dinde_f :
+            color_f, weight_f = node_f.get_color(), node_f.get_weight()
             dic_dinde_f[color_f] = dic_dinde_f.get(color_f, 0) + weight_f
         
+        print("dic_dinde_m : ", dic_dinde_m)
+        print("dic_dinde_f : ", dic_dinde_f)
+
         # Crossing both dic 
         for color_m, weight_m in dic_dinde_m.items() :
             for color_f, weight_f in dic_dinde_f.items() :
