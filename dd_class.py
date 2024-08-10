@@ -212,7 +212,7 @@ class Genealogie:
         return self.get_ancestors_at_level(self.root_node, 0, level)
 
     def traverse_genealogy(self, node, nodes_list, current_level):
-        if node is None or current_level > 3:
+        if node is None or current_level > 3 :
             return
         nodes_list.append(node)
         self.traverse_genealogy(node.get_ancestor_m(), nodes_list, current_level + 1)
@@ -367,6 +367,7 @@ class Elevage:
 
         node_list_dinde_m = dinde_m.get_arbre_genealogique().get_all_nodes()
         node_list_dinde_f = dinde_f.get_arbre_genealogique().get_all_nodes()
+ 
         dic_dinde_m = dict()
         dic_dinde_f = dict()
         color_prob = defaultdict(float)
@@ -379,7 +380,7 @@ class Elevage:
         for node_f in node_list_dinde_f :
             color_f, weight_f = node_f.get_color(), node_f.get_weight()
             dic_dinde_f[color_f] = dic_dinde_f.get(color_f, 0) + weight_f
-        
+
         # Crossing both dic 
         for color_m, weight_m in dic_dinde_m.items() :
             for color_f, weight_f in dic_dinde_f.items() :

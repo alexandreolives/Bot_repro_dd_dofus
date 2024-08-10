@@ -110,7 +110,27 @@ class TestCrosing(unittest.TestCase):
         self.genealogie_4.update_weights()
         self.dd_4 = dd_class.Dragodinde(4, "F", "Pourpre et Orchidée", 6, self.genealogie_4)
 
-        self.elevage = dd_class.Elevage([self.dd_1, self.dd_2, self.dd_3, self.dd_4, 
+        # big ancester 
+        self.gggp1 = dd_class.Node("Ebène", 1)
+        self.gggp2 = dd_class.Node("Prune", 0.2)
+        self.gggp3 = dd_class.Node("Orchidée", 0.6)
+        self.gggp4 = dd_class.Node("Pourpre", 0.5)
+        self.ggp1 = dd_class.Node("Amande", None, self.gggp1, self.gggp2)
+        self.ggp2 = dd_class.Node("Amande", None, self.gggp3, self.ggp4)
+        self.ggp3 = dd_class.Node("Amande")
+        self.ggp4 = dd_class.Node("Amande")
+        self.gp1 = dd_class.Node("Amande", None, self.ggp1, self.ggp2)
+        self.gp2 = dd_class.Node("Amande", None, self.ggp3, self.ggp4)
+        self.p1 = dd_class.Node("Amande", None, self.gp1, self.gp2)
+        self.gp3 = dd_class.Node("Amande")
+        self.gp4 = dd_class.Node("Amande")        
+        self.p2 = dd_class.Node("Amande", None, self.gp3, self.gp4)
+        self.ind_5 = dd_class.Node("Amande", None, self.p1, self.p2)
+        self.genealogie_5 = dd_class.Genealogie(self.ind_5)
+        self.genealogie_5.update_weights()
+        self.dd_5 = dd_class.Dragodinde(5, "M", "Amande", 1, self.genealogie_5)
+ 
+        self.elevage = dd_class.Elevage([self.dd_1, self.dd_2, self.dd_3, self.dd_4, self.dd_5,
                                          self.dd_sm1, self.dd_sm2, self.dd_sb1, self.dd_sb2,
                                          self.dd_fb1, self.dd_fb2])
 
@@ -119,6 +139,15 @@ class TestCrosing(unittest.TestCase):
             self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(3))
 
         self.assertEqual(str(context.exception), "Cannot breed dragodindes of the same sex.")
+
+    def test_crosing_big_ancestor_mono_mono(self):
+        _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(101), self.elevage.get_dd_by_id(5))
+        expected_probability = {
+                "Amande" : 100
+            }
+        
+        print("dic_probability big ancestor mono mono : ", dic_probability, '\n')
+        self.assertEqual(dic_probability, expected_probability)
 
     def test_crosing_mono_mono(self):
         _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(2))
