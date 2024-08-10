@@ -1,6 +1,7 @@
 import unittest
 import dd_class
 
+# Website to generated test : https://felis-silvestris.lescigales.org/
 class TestGenealogie(unittest.TestCase):
 
     def setUp(self):
@@ -219,13 +220,13 @@ class TestCrosing(unittest.TestCase):
     def test_crosing_first_bi_bi(self):
         _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(300), self.elevage.get_dd_by_id(301))
         expected_probability = {
-                "Rousse et Dorée" : 19.76,
-                "Amande et Dorée" : 19.76,
-                "Dorée" : 17.83,
-                "Amande" : 17.55,
-                "Rousse" : 17.55,
-                "Ebène" : 6.89,
-                "Rousse et Amande" : 0.68,
+                "Rousse et Dorée" : 19.756,
+                "Amande et Dorée" : 19.756,
+                "Dorée" : 17.828,
+                "Amande" : 17.549,
+                "Rousse" : 17.549,
+                "Ebène" : 6.887,
+                "Rousse et Amande" : 0.676,
             }
         
         print("dic_probability first bi-bi : ", dic_probability, '\n')
