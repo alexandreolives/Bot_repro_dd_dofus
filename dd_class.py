@@ -88,13 +88,20 @@ class Generations:
             if color in generation.get_colors():
                 return generation.get_apprendissage()[generation.get_colors().index(color)]
         raise ValueError("Color not find in the generations object")
-    
+            
     def get_list_bicolor(self) -> list :
         list_bicolor = []
         for generation in self.generations :
             if not generation.get_monocolor() :
                 list_bicolor.extend(generation.get_colors())
         return list_bicolor
+    
+    def get_list_monocolor(self) -> list :
+        list_monoolor = []
+        for generation in self.generations :
+            if generation.get_monocolor() :
+                list_monoolor.extend(generation.get_colors())
+        return list_monoolor
     
     def initialize_generations(self):
  
