@@ -77,7 +77,7 @@ class Generations:
     def __init__(self):
         self.generations = self.initialize_generations()
 
-    def get_generation(self) :
+    def get_generations(self) :
         return self.generations
     
     def get_generation_by_color(self, color: str) -> int:
