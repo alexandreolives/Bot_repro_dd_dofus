@@ -1,6 +1,7 @@
 import unittest
 import dd_class
 
+# Website to generated test : https://felis-silvestris.lescigales.org/
 class TestGenealogie(unittest.TestCase):
 
     def setUp(self):
@@ -29,7 +30,7 @@ class TestGenealogie(unittest.TestCase):
 class TestCrosing(unittest.TestCase):
 
     def setUp(self) :
-        self.maxDiff = None  # Set maxDiff to None to see the full diff
+        self.maxDiff = None
 
         #                    id  sex   color  generation   root
         # dd_class.Dragodinde(1, "M", "Rousse", 1, self.genealogie_s1)
@@ -45,14 +46,14 @@ class TestCrosing(unittest.TestCase):
         # first bi
         self.p1 = dd_class.Node("Rousse")
         self.p2 = dd_class.Node("Dorée")
-        self.ind_1 = dd_class.Node("Rousse et Dorée", 0.5, self.p1, self.p2)
+        self.ind_1 = dd_class.Node("Rousse et Dorée", None, self.p1, self.p2)
         self.genealogie_1 = dd_class.Genealogie(self.ind_1)
         self.genealogie_1.update_weights()
         self.dd_fb1 = dd_class.Dragodinde(300, "M", "Rousse et Dorée", 2, self.genealogie_1)
 
         self.p1 = dd_class.Node("Amande")
         self.p2 = dd_class.Node("Dorée")
-        self.ind_1 = dd_class.Node("Amande et Dorée", 0.5, self.p1, self.p2)
+        self.ind_1 = dd_class.Node("Amande et Dorée", None, self.p1, self.p2)
         self.genealogie_1 = dd_class.Genealogie(self.ind_1)
         self.genealogie_1.update_weights()
         self.dd_fb2 = dd_class.Dragodinde(301, "F", "Amande et Dorée", 2, self.genealogie_1)
@@ -61,7 +62,9 @@ class TestCrosing(unittest.TestCase):
         self.gp1 = dd_class.Node("Ebène")
         self.gp2 = dd_class.Node("Amande")
         self.p1 = dd_class.Node("Amande", None, self.gp1, self.gp2)
-        self.genealogie_1 = dd_class.Genealogie(self.p1)
+        self.p2 = dd_class.Node("Amande")
+        self.ind_1 = dd_class.Node("Amande", None, self.p1, self.p2)
+        self.genealogie_1 = dd_class.Genealogie(self.ind_1)
         self.genealogie_1.update_weights()
         self.dd_1 = dd_class.Dragodinde(1, "M", "Amande", 1, self.genealogie_1)
 
@@ -69,7 +72,9 @@ class TestCrosing(unittest.TestCase):
         self.gp3 = dd_class.Node("Indigo")
         self.gp4 = dd_class.Node("Rousse")
         self.p2 = dd_class.Node("Rousse", 0.5, self.gp3, self.gp4)
-        self.genealogie_2 = dd_class.Genealogie(self.p2)
+        self.p3 = dd_class.Node("Rousse")
+        self.ind_2 = dd_class.Node("Rousse", None, self.p2, self.p3)
+        self.genealogie_2 = dd_class.Genealogie(self.ind_2)
         self.genealogie_2.update_weights()
         self.dd_2 = dd_class.Dragodinde(2, "F", "Rousse", 1, self.genealogie_2)
 
@@ -105,7 +110,27 @@ class TestCrosing(unittest.TestCase):
         self.genealogie_4.update_weights()
         self.dd_4 = dd_class.Dragodinde(4, "F", "Pourpre et Orchidée", 6, self.genealogie_4)
 
-        self.elevage = dd_class.Elevage([self.dd_1, self.dd_2, self.dd_3, self.dd_4, 
+        # big ancester 
+        self.gggp1 = dd_class.Node("Ebène", 1)
+        self.gggp2 = dd_class.Node("Prune", 0.2)
+        self.gggp3 = dd_class.Node("Orchidée", 0.6)
+        self.gggp4 = dd_class.Node("Pourpre", 0.5)
+        self.ggp1 = dd_class.Node("Amande", None, self.gggp1, self.gggp2)
+        self.ggp2 = dd_class.Node("Amande", None, self.gggp3, self.ggp4)
+        self.ggp3 = dd_class.Node("Amande")
+        self.ggp4 = dd_class.Node("Amande")
+        self.gp1 = dd_class.Node("Amande", None, self.ggp1, self.ggp2)
+        self.gp2 = dd_class.Node("Amande", None, self.ggp3, self.ggp4)
+        self.p1 = dd_class.Node("Amande", None, self.gp1, self.gp2)
+        self.gp3 = dd_class.Node("Amande")
+        self.gp4 = dd_class.Node("Amande")        
+        self.p2 = dd_class.Node("Amande", None, self.gp3, self.gp4)
+        self.ind_5 = dd_class.Node("Amande", None, self.p1, self.p2)
+        self.genealogie_5 = dd_class.Genealogie(self.ind_5)
+        self.genealogie_5.update_weights()
+        self.dd_5 = dd_class.Dragodinde(5, "M", "Amande", 1, self.genealogie_5)
+ 
+        self.elevage = dd_class.Elevage([self.dd_1, self.dd_2, self.dd_3, self.dd_4, self.dd_5,
                                          self.dd_sm1, self.dd_sm2, self.dd_sb1, self.dd_sb2,
                                          self.dd_fb1, self.dd_fb2])
 
@@ -115,17 +140,26 @@ class TestCrosing(unittest.TestCase):
 
         self.assertEqual(str(context.exception), "Cannot breed dragodindes of the same sex.")
 
+    def test_crosing_big_ancestor_mono_mono(self):
+        _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(101), self.elevage.get_dd_by_id(5))
+        expected_probability = {
+                "Amande" : 100
+            }
+        
+        print("dic_probability big ancestor mono mono : ", dic_probability, '\n')
+        self.assertEqual(dic_probability, expected_probability)
+
     def test_crosing_mono_mono(self):
         _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(1), self.elevage.get_dd_by_id(2))
         expected_probability = {
-                "Rousse": 33.96,
-                "Amande": 33.96,
-                "Indigo": 11.24,
-                "Ebène": 11.24,
-                "Rousse et Amande": 4.81,
-                "Amande et Indigo": 1.98,
-                "Rousse et Ebène": 1.98,
-                "Indigo et Ebène": 0.83
+                "Rousse": 41.019,
+                "Amande": 41.019,
+                "Rousse et Amande": 7.247,
+                "Indigo": 4.337,
+                "Ebène": 4.337,
+                "Amande et Indigo": 0.957,
+                "Rousse et Ebène": 0.957,
+                "Indigo et Ebène": 0.128
             }
 
         print("dic_probability mono-mono: ", dic_probability, '\n')
@@ -155,26 +189,26 @@ class TestCrosing(unittest.TestCase):
     def test_crosing_bi_bi(self):
         _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(3), self.elevage.get_dd_by_id(4))
         expected_probability = {
-                "Rousse et Amande" : 16.59,
-                "Pourpre et Orchidée" : 13.32,
-                "Amande et Indigo" : 10.30,
-                "Pourpre et Rousse" : 9.30,
-                "Indigo et Ebène" : 8.51,
-                "Indigo et Orchidée" : 4.65,
-                "Ivoire et Prune" : 4.15,
-                "Ebène et Ivoire" : 3.91,
-                "Amande et Turquoise" : 3.91,
-                "Rousse et Prune" : 3.38,
-                "Indigo et Ivoire" : 3.23,
-                "Rousse et Ebène" : 3.23,
-                "Amande et Ivoire" : 3.23,
-                "Turquoise et Rousse" : 2.38,
-                "Orchidée et Emeraude" : 2.07,
-                "Dorée et Emeraude" : 2.07,
+                "Rousse et Amande" : 16.595,
+                "Pourpre et Orchidée" : 13.321,
+                "Amande et Indigo" : 10.297,
+                "Pourpre et Rousse" : 9.299,
+                "Indigo et Ebène" : 8.513,
+                "Indigo et Orchidée" : 4.649,
+                "Ivoire et Prune" : 4.148,
+                "Ebène et Ivoire" : 3.913,
+                "Amande et Turquoise" : 3.913,
+                "Rousse et Prune" : 3.378,
+                "Indigo et Ivoire" : 3.234,
+                "Rousse et Ebène" : 3.229,
+                "Amande et Ivoire" : 3.234,
+                "Turquoise et Rousse" : 2.382,
+                "Orchidée et Emeraude" : 2.074,
+                "Dorée et Emeraude" : 2.074,
                 "Dorée et Orchidée" : 1.55,
                 "Orchidée et Rousse" : 1.55,
-                "Dorée et Indigo" : 1.51,
-                "Pourpre" : 1.13
+                "Dorée et Indigo" : 1.513,
+                "Pourpre" : 1.133
 
             }
         
@@ -184,8 +218,8 @@ class TestCrosing(unittest.TestCase):
     def test_crosing_simple_mono_bi(self):
         _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(100), self.elevage.get_dd_by_id(201))
         expected_probability = {
-                "Rousse" : 83.33,
-                "Pourpre et Ivoire" : 16.67
+                "Rousse" : 83.333,
+                "Pourpre et Ivoire" : 16.667
             }
         
         print("dic_probability simple mono-bi : ", dic_probability, '\n')
@@ -194,9 +228,9 @@ class TestCrosing(unittest.TestCase):
     def test_crosing_simple_mono_mono(self):
         _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(100), self.elevage.get_dd_by_id(101))
         expected_probability = {
-                "Rousse" : 45.45,
-                "Amande" : 45.45,
-                "Rousse et Amande" : 9.09,
+                "Rousse" : 45.455,
+                "Amande" : 45.455,
+                "Rousse et Amande" : 9.091
             }
         
         print("dic_probability simple mono-mono : ", dic_probability, '\n')
@@ -215,13 +249,13 @@ class TestCrosing(unittest.TestCase):
     def test_crosing_first_bi_bi(self):
         _, dic_probability = self.elevage.accouplement_naissance(self.elevage.get_dd_by_id(300), self.elevage.get_dd_by_id(301))
         expected_probability = {
-                "Rousse et Dorée" : 19.76,
-                "Amande et Dorée" : 19.76,
-                "Dorée" : 17.83,
-                "Amande" : 17.55,
-                "Rousse" : 17.55,
-                "Ebène" : 6.89,
-                "Rousse et Amande" : 0.68,
+                "Rousse et Dorée" : 19.756,
+                "Amande et Dorée" : 19.756,
+                "Dorée" : 17.828,
+                "Amande" : 17.549,
+                "Rousse" : 17.549,
+                "Ebène" : 6.887,
+                "Rousse et Amande" : 0.676,
             }
         
         print("dic_probability first bi-bi : ", dic_probability, '\n')
