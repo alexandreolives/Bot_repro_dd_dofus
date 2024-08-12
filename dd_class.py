@@ -109,7 +109,7 @@ class Generations:
     def initialize_generations(self):
  
         generations_data = [
-            # (generation, monocolor, dict(color: weight))
+            # (generation, monocolor, dict(color: apprentissage factor))
             (1, True, {"Rousse": 1.0, "Amande": 1.0, "Dorée": 0.2}),
             (2, False, {"Rousse et Amande": 0.8, "Rousse et Dorée": 0.8, "Amande et Dorée": 0.8}),
             (3, True, {"Indigo": 0.8, "Ebène": 0.8}),
