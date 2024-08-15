@@ -31,7 +31,7 @@ class Dragodinde:
     def get_sex(self):
         return self.sex
 
-    def get_couleur(self):
+    def get_color(self):
         return self.couleur
 
     def get_generation(self):
@@ -260,8 +260,11 @@ class Elevage:
         self.list_bicolor_dd = self.generations.get_list_bicolor()
 
     def __str__(self):
-        return "\n".join(str(dragodinde.get_couleur()) for dragodinde in self.dragodindes)
+        return "\n".join(str(dragodinde.get_color()) for dragodinde in self.dragodindes)
 
+    def get_special_cases(self) :
+        return self.special_cases
+    
     def get_dragodindes(self) :
         return self.dragodindes
     
