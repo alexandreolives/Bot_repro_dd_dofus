@@ -1,6 +1,6 @@
-# Dragodinde Breeding Bot
+# Road2Ten (R2T)
 
-This project is an AI-powered bot designed to simulate the breeding process of Dragodindes (a fictional creature from the game Dofus). The bot calculates the probabilities of offspring colors based on the genealogy of the parent Dragodindes.
+Road2Ten is project designed to simulate the breeding process of Dragodindes (a fictional creature from the game Dofus). The model try to find the best breedind paths to archive with a minimal breeding the 10th generation (begining to the 1st one).
 
 ## Table of Contents
 
