@@ -136,7 +136,7 @@ class Generations:
                 "Dorée et Emeraude": 0.2, "Dorée et Prune": 0.2, "Indigo et Emeraude": 0.2, "Indigo et Prune": 0.2,
                 "Ebène et Emeraude": 0.2, "Ebène et Prune": 0.2, "Pourpre et Emeraude": 0.2, "Pourpre et Prune": 0.2,
                 "Orchidée et Emeraude": 0.2, "Orchidée et Prune": 0.2, "Ivoire et Emeraude": 0.2, "Ivoire et Prune": 0.2,
-                "Turquoise et Emeraude": 0.2, "Turquoise et Prune": 0.2
+                "Turquoise et Emeraude": 0.2, "Turquoise et Prune": 0.2, "Prune et Emeraude": 0.2
             })
         ]
 
