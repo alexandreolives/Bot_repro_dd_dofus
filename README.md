@@ -1,6 +1,6 @@
 # Road2Ten (R2T)
 
-Road2Ten is IA project (PPO) designed to optimize the breeding process of Dragodindes (a fictional creature from the game Dofus). The model try to find the best breedind paths to archive with a minimal breeding the 10th generation (begining to the 1st one).
+Road2Ten is IA project designed to optimize the breeding process of Dragodindes (a fictional creature from the game Dofus). The model try to find the best breedind paths to archive with a minimal breeding the 10th generation (begining to the 1st one).
 
 ## Table of Contents
 
