@@ -5,10 +5,10 @@ import random
 
 # @dataclass
 class Dragodinde:
-    def __init__(self, id : int, sex: str, couleur: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
+    def __init__(self, id : int, sex: str, color: str, generation: int, arbre_genealogique=None, nombre_reproductions=0):
         self.id = id
         self.sex = sex
-        self.couleur = couleur
+        self.color = color
         self.generation = generation
         self.arbre_genealogique = arbre_genealogique
         self.nombre_reproductions = nombre_reproductions
@@ -32,7 +32,7 @@ class Dragodinde:
         return self.sex
 
     def get_color(self):
-        return self.couleur
+        return self.color
 
     def get_generation(self):
         return self.generation
@@ -49,7 +49,7 @@ class Dragodinde:
     def __str__(self):
         return (f"ID: {self.id}\n"
                 f"Sexe: {self.sex}\n"
-                f"Couleur: {self.couleur}\n"
+                f"Couleur: {self.color}\n"
                 f"Arbre Généalogique: {self.arbre_genealogique}\n"
                 f"Génération: {self.generation}\n"
                 f"Nombre de reproductions: {self.nombre_reproductions}\n")
