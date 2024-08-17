@@ -17,7 +17,7 @@ class Dragodinde:
         if arbre_genealogique is not None:
             self.arbre_genealogique = arbre_genealogique.update_weights()
         else:
-            self.arbre_genealogique = Genealogie(Node(self.couleur, 10/42))
+            self.arbre_genealogique = Genealogie(Node(self.color, 10/42))
 
         if self.sex not in ("M", "F"):
             raise ValueError("sex must be 'M' or 'F'")
@@ -49,7 +49,7 @@ class Dragodinde:
     def __str__(self):
         return (f"ID: {self.id}\n"
                 f"Sexe: {self.sex}\n"
-                f"Couleur: {self.color}\n"
+                f"color: {self.color}\n"
                 f"Arbre Généalogique: {self.arbre_genealogique}\n"
                 f"Génération: {self.generation}\n"
                 f"Nombre de reproductions: {self.nombre_reproductions}\n")
@@ -338,41 +338,41 @@ class Elevage:
     def calcul_prob_color_new(self, PGC_c1, PGC_c2, PGC_c3) -> float :
         return (0.5 * PGC_c3) / (PGC_c1 + PGC_c2 + 0.5 * PGC_c3)
      
-    def crossing_incompatible(self, couleur_A: str, weight_A : float, couleur_B: str, weight_B : float, color_prob : defaultdict):
+    def crossing_incompatible(self, color_A: str, weight_A : float, color_B: str, weight_B : float, color_prob : defaultdict):
         """
         Crossing where 2 dd can't create a third one
         """
-        if couleur_A != couleur_B :
+        if color_A != color_B :
 
-            pgc_a = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_A), self.generations.get_generation_by_color(couleur_A))
-            pgc_b = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_B), self.generations.get_generation_by_color(couleur_B))
+            pgc_a = self.calcul_PGC(self.generations.get_apprentissage_by_color(color_A), self.generations.get_generation_by_color(color_A))
+            pgc_b = self.calcul_PGC(self.generations.get_apprentissage_by_color(color_B), self.generations.get_generation_by_color(color_B))
             Proba_a = self.calcul_prob_color_imcomp(pgc_a, pgc_b)
             Proba_b = self.calcul_prob_color_imcomp(pgc_b, pgc_a)
-            color_prob[couleur_A] = color_prob.get(couleur_A, 0) + Proba_a * weight_A * weight_B
-            color_prob[couleur_B] = color_prob.get(couleur_B, 0) + Proba_b * weight_A * weight_B
+            color_prob[color_A] = color_prob.get(color_A, 0) + Proba_a * weight_A * weight_B
+            color_prob[color_B] = color_prob.get(color_B, 0) + Proba_b * weight_A * weight_B
     
         else:
-            color_prob[couleur_A] = color_prob.get(couleur_A, 0) + 1.0 * weight_A * weight_B
+            color_prob[color_A] = color_prob.get(color_A, 0) + 1.0 * weight_A * weight_B
 
         return color_prob
 
-    def crossing_compatible(self, couleur_A: str, weight_A : float, couleur_B: str, weight_B : float, color_prob : defaultdict):
+    def crossing_compatible(self, color_A: str, weight_A : float, color_B: str, weight_B : float, color_prob : defaultdict):
         """
         Crossing where 2 dd can create a third one
         """
-        couleur_C = self.identify_new_color(couleur_A, couleur_B)
+        color_C = self.identify_new_color(color_A, color_B)
 
-        pgc_a = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_A), self.generations.get_generation_by_color(couleur_A))
-        pgc_b = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_B), self.generations.get_generation_by_color(couleur_B))
-        pgc_c = self.calcul_PGC(self.generations.get_apprentissage_by_color(couleur_C), self.generations.get_generation_by_color(couleur_C))
+        pgc_a = self.calcul_PGC(self.generations.get_apprentissage_by_color(color_A), self.generations.get_generation_by_color(color_A))
+        pgc_b = self.calcul_PGC(self.generations.get_apprentissage_by_color(color_B), self.generations.get_generation_by_color(color_B))
+        pgc_c = self.calcul_PGC(self.generations.get_apprentissage_by_color(color_C), self.generations.get_generation_by_color(color_C))
 
         Proba_a = self.calcul_prob_color_comp(pgc_a, pgc_b, pgc_c)
         Proba_b = self.calcul_prob_color_comp(pgc_b, pgc_a, pgc_c)
         Proba_c = self.calcul_prob_color_new(pgc_a, pgc_b, pgc_c)
 
-        color_prob[couleur_A] = color_prob.get(couleur_A, 0) + Proba_a * weight_A * weight_B
-        color_prob[couleur_B] = color_prob.get(couleur_B, 0) + Proba_b * weight_A * weight_B
-        color_prob[couleur_C] = color_prob.get(couleur_C, 0) + Proba_c * weight_A * weight_B
+        color_prob[color_A] = color_prob.get(color_A, 0) + Proba_a * weight_A * weight_B
+        color_prob[color_B] = color_prob.get(color_B, 0) + Proba_b * weight_A * weight_B
+        color_prob[color_C] = color_prob.get(color_C, 0) + Proba_c * weight_A * weight_B
 
         return color_prob
 
@@ -436,15 +436,15 @@ class Elevage:
         sexe = random.choice(['M', 'F'])
         dic_probability = self.crossing(male, female)
         dic_probability = self.round_dict_values(self.normalise_proba(dic_probability))
-        couleur = self.choice_color(dic_probability)
+        color = self.choice_color(dic_probability)
         
         # Create an new dd
-        generation = self.get_generation(couleur)
+        generation = self.get_generation(color)
         node_parent_m = male.get_arbre_genealogique().get_node()
         node_parent_f = female.get_arbre_genealogique().get_node()
-        new_ind = Node(couleur, 0.5, node_parent_m, node_parent_f)
+        new_ind = Node(color, 0.5, node_parent_m, node_parent_f)
         nouvel_arbre_genealogique = Genealogie(new_ind)
-        nouvelle_dd = Dragodinde(nouvel_id, sexe, couleur, generation, nouvel_arbre_genealogique)
+        nouvelle_dd = Dragodinde(nouvel_id, sexe, color, generation, nouvel_arbre_genealogique)
         self.naissance(nouvelle_dd)
 
         self.check_mort(male)
