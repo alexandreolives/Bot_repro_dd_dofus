@@ -23,7 +23,7 @@ However, there are a few key differences :
 
 ## Installation
 
-This project requires Python 3.10.
+This project requires Python 3.10 or latest.
 
 To set up the project, run the following commands:
 
@@ -38,7 +38,6 @@ pip install -r requirements.txt
 - Calculate breeding probabilities for single-color and bi-color Dragodindes.
 - Account for genealogical influence up to great-grandparents.
 - Handle special cases for specific color combinations.
-- Flexible and extensible design for future enhancements.
 
 ## Models
 
