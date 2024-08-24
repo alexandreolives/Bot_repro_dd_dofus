@@ -48,8 +48,8 @@ class Dragodinde:
     
     def __str__(self):
         return (f"ID: {self.id}\n"
-                f"Sexe: {self.sex}\n"
-                f"color: {self.color}\n"
+                f"Sex: {self.sex}\n"
+                f"Color: {self.color}\n"
                 f"Arbre Généalogique: {self.arbre_genealogique}\n"
                 f"Génération: {self.generation}\n"
                 f"Nombre de reproductions: {self.nombre_reproductions}\n")
